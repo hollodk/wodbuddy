@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello DefaultController!{% endblock %}
+
+{% block body %}
+<div class="example-wrapper">
+    <h1>Hello {{ organization.name }}</h1>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Coming Workouts</h3>
+                </div>
+                <div class="card-body">
+                    {% for wod in wods %}
+                    <div class="card">
+                        <div class="card-header">
+                            Start at: {{ wod.startAt|date('Y/m/d H:i') }}
+                        </div>
+                        <div class="card-body">
+                            {% if wod.name %}<b>{{ wod.name }}</b><br>{% endif %}
+                            {{ wod.description|nl2br }}
+                        </div>
+                        <div class="card-footer text-right">
+                            <a class="btn btn-primary" href="{{ path('app_default_wod', {'id':wod.id}) }}">Join</a>
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <p>There is no wods yet, create your first wod in the right side</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Create Workout</h3>
+
+                    {{ form_start(wod_form) }}
+                    {{ form_row(wod_form.name) }}
+                    {{ form_row(wod_form.startAt) }}
+                    {{ form_row(wod_form.timer) }}
+                    {{ form_row(wod_form.description) }}
+                    <button class="btn btn-primary" type="submit">Create</button>
+                    {{ form_end(wod_form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

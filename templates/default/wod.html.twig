@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello DefaultController!{% endblock %}
+
+{% block javascripts %}
+<script>
+{% if participant %}
+var pingUrl = '{{ path('app_api_ping', {'id':participant.id}) }}';
+{% else %}
+var pingUrl = '';
+{% endif %}
+
+var participantsUrl = '{{ path('app_api_participants', {'id':wod.id}) }}';
+</script>
+<script src="{{ asset('js/wodbuddy.clock.js') }}?v={{ random() }}"></script>
+{% endblock %}
+
+{% block body %}
+<div class="example-wrapper">
+    <h1>Hello {{ wod.name }}</h1>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card mb-2">
+                <div class="card-header">
+                    Start at: {{ wod.startAt|date('Y/m/d H:i') }}
+                </div>
+                <div class="card-body">
+                    {{ wod.description|nl2br }}
+                </div>
+                {% if wod.name %}
+                <div class="card-footer">
+                    <b>{{ wod.name }}</b>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card" id="wodbuddy-box">
+                <div class="card-header">
+                    Timer
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-2">
+                        <span class="btn btn-primary wodbuddy-timer-type" data-type="clock">Clock</span>
+                        <span class="btn btn-primary wodbuddy-timer-type" data-type="timer">Timer</span>
+                        <span class="btn btn-primary wodbuddy-timer-type" data-type="tabata">Tabata</span>
+                        <span class="btn btn-primary wodbuddy-timer-type" data-type="emom">EMOM</span>
+                    </div>
+
+                    <span class="h1" id="wodbuddy-clock">Waiting to start</span>
+                    <hr>
+                    <span class="btn btn-block btn-lg btn-primary" id="wodbuddy-finish">FINISH</span>
+                </div>
+
+                <div class="card-footer text-right">
+                    <span class="btn btn-primary" id="wodbuddy-pause">pause</span>
+                    <span class="btn btn-danger" id="wodbuddy-reset">reset</span>
+                    <span class="btn btn-primary" id="wodbuddy-start">start</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="card mb-2">
+                <div class="card-header">
+                    Organization
+                </div>
+                <div class="card-body">
+                    <a class="btn btn-primary" href="{{ path('app_default_organization', {'id':organization.id}) }}">Go back to {{ organization.name }}</a>
+                </div>
+            </div>
+
+            {% if participant == null %}
+            <div class="card mb-2">
+                <div class="card-header">
+                    Join Workout
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                    {{ form_row(form.name) }}
+                    <button class="btn btn-primary" type="submit">Join</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="card-header">
+                    Participants
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped" id="participant-box">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
