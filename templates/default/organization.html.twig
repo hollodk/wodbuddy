@@ -14,13 +14,15 @@
                 </div>
                 <div class="card-body">
                     {% for wod in wods %}
-                    <div class="card">
+                    <div class="card mb-2">
                         <div class="card-header">
                             Start at: {{ wod.startAt|date('Y/m/d H:i') }}
                         </div>
                         <div class="card-body">
                             {% if wod.name %}<b>{{ wod.name }}</b><br>{% endif %}
                             {{ wod.description|nl2br }}
+                            <hr>
+                            type: <b>{{ wod.timer }}</b>
                         </div>
                         <div class="card-footer text-right">
                             <a class="btn btn-primary" href="{{ path('app_default_wod', {'id':wod.id}) }}">Join</a>

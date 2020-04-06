@@ -61,6 +61,21 @@ class ApiController extends AbstractController
     }
 
     /**
+     * @Route("/ready")
+     */
+    public function ready(Request $request)
+    {
+        $memcached = new \Memcached();
+        $memcached->addServer('localhost', '11211');
+
+        $status = $memcached->get('wod_status_'.$request->get('id'));
+
+        return new JsonResponse([
+            'start' => $status,
+        ]);
+    }
+
+    /**
      * @Route("/ping")
      */
     public function ping(Request $request)
@@ -95,5 +110,4 @@ class ApiController extends AbstractController
             return $diff . " " . $strTime[$i] . "(s) ago ";
         }
     }
-
 }

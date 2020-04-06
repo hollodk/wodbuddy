@@ -1,26 +1,40 @@
-var type = null;
+var startDelay = wbConfig.delay;
 
-var startPause = 5;
+// repeat counter
+var repeatCounter = 0;
 
 // clock
 var clockCounter = 0;
 
 // timer
-var countDown = 60*20;
+var countStart = toSeconds(wbConfig.time);
+var countDown = countStart;
 
 // emom
-var emomSeconds = 60;
+var emomSeconds = toSeconds(wbConfig.emomtime);
 var emomRound = 0;
 var emomCountDown = null;
 
 // tabata
 var tabataInterval = 20;
+var tabataPause = 10;
 var tabataCountDown = 0;
-var tabataPause = 0;
 var tabataRound = 0;
 
 var timerInterval = null;
+var readyInterval = null;
+var monitorStarted = false;
 
+// modal-form
+$(document).ready(function() {
+    updateModal();
+});
+
+$('#modal-form-type').on('change', function() {
+    updateModal();
+});
+
+// wodbuddy stuff
 $(document).ready(function() {
     $('#wodbuddy-reset').hide();
     $('#wodbuddy-pause').hide();
@@ -40,14 +54,133 @@ $(document).ready(function() {
     }
 });
 
+// wodbuddy stuff
+$('#wodbuddy-begin').on('click', function() {
+    initStart();
+});
+
+$('#wodbuddy-pause').on('click', function() {
+    $('#wodbuddy-pause').hide();
+    $('#wodbuddy-reset').show();
+    $('#wodbuddy-start').show();
+
+    clearInterval(timerInterval);
+});
+
+$('#wodbuddy-reset').on('click', function() {
+    $('#wodbuddy-pause').hide();
+    $('#wodbuddy-reset').hide();
+    $('#wodbuddy-start').show();
+
+    clockCounter = 0;
+
+    displayClock()
+});
+
+$('#wodbuddy-start').on('click', function() {
+    $('#wodbuddy-reset').hide();
+    $('#wodbuddy-start').hide();
+
+    startClock();
+});
+
+$('#wodbuddy-finish').on('click', function() {
+    finish();
+});
+
+function startMonitor()
+{
+    if (monitorStarted == false) {
+        console.log('eeh');
+        monitorStarted = true;
+
+        readyInterval = setInterval(function() {
+            $.get(readyUrl, function(data) {
+                if (data.start == true) {
+                    clearInterval(readyInterval);
+                    initStart();
+                }
+            });
+        }, 1000);
+    }
+}
+
+function initStart()
+{
+    $('#wodbuddy-begin').hide();
+
+    $('#wodbuddy-clock').html('Starting in '+startDelay+' seconds');
+
+    var x = setInterval(function() {
+        startDelay--;
+        $('#wodbuddy-clock').html('Starting in '+startDelay+' seconds');
+
+        if (startDelay <= 3) {
+            $('#wodbuddy-box').addClass('bg-danger');
+        }
+
+        if (startDelay <= 0) {
+            clearInterval(x);
+            startClock();
+        }
+    }, 1000);
+}
+
+function updateModal()
+{
+    var value = $('#modal-form-type option:checked').val();
+
+    switch (value) {
+        case 'clock':
+            $('#modal-time').hide();
+            $('#modal-emomtime').hide();
+            $('#modal-round').hide();
+            $('#modal-repeat').hide();
+            $('#modal-break').hide();
+
+            break;
+
+        case 'timer':
+            $('#modal-time').show();
+            $('#modal-emomtime').hide();
+            $('#modal-round').hide();
+            $('#modal-repeat').show();
+            $('#modal-break').show();
+
+            break;
+
+        case 'tabata':
+            $('#modal-time').hide();
+            $('#modal-emomtime').hide();
+            $('#modal-round').hide();
+            $('#modal-repeat').show();
+            $('#modal-break').show();
+
+            break;
+
+        case 'emom':
+            $('#modal-time').hide();
+            $('#modal-emomtime').show();
+            $('#modal-round').show();
+            $('#modal-repeat').show();
+            $('#modal-break').show();
+
+            break;
+    }
+}
+
 function updateParticipants()
 {
     $.get(participantsUrl, function(data) {
         $('#participant-box').html('');
 
+        if (data.participants.length > 1) {
+            startMonitor();
+        }
+
         $.each(data.participants, function(key, value) {
             if (value.is_me) {
-                $('#participant-box').append('<tr><td><b>'+value.name+'</b></td><td class="text-right">'+value.time_ago+'</td></tr>');
+                $('#participant-box').append('<tr><td><b>&#62; '+value.name+'</b></td><td class="text-right">'+value.time_ago+'</td></tr>');
             } else {
                 $('#participant-box').append('<tr><td>'+value.name+'</td><td class="text-right">'+value.time_ago+'</td></tr>');
             }
@@ -55,37 +188,15 @@ function updateParticipants()
     });
 }
 
-$('.wodbuddy-timer-type').on('click', function() {
-    $('.wodbuddy-timer-type').hide();
-    type = $(this).data('type');
-
-    $('#wodbuddy-clock').html('Starting in '+startPause+' seconds');
-
-    var x = setInterval(function() {
-        startPause--;
-        $('#wodbuddy-clock').html('Starting in '+startPause+' seconds');
-
-        if (startPause <= 3) {
-            $('#wodbuddy-box').addClass('bg-danger');
-        }
-
-        if (startPause <= 1) {
-            clearInterval(x);
-            startClock();
-        }
-    }, 1000);
-});
-
 function startClock()
 {
     ding();
 
-    switch (type) {
+    switch (wbConfig.type) {
         case 'clock':
             timerInterval = setInterval(function() {
-                defaultStart();
-
                 clockCounter++;
+                defaultStart();
 
                 if ((clockCounter%60) == 0) ding();
                 $('#wodbuddy-finish').show();
@@ -96,9 +207,9 @@ function startClock()
 
         case 'timer':
             timerInterval = setInterval(function() {
+                countDown--;
                 defaultStart();
 
-                countDown--;
                 if ((countDown%60) == 0) ding();
 
                 if (countDown <= 3) {
@@ -106,7 +217,15 @@ function startClock()
                 }
 
                 if (countDown <= 0) {
-                    finish();
+                    repeatCounter++;
+
+                    if (repeatCounter < wbConfig.repeat) {
+                        countDown = countStart;
+                        startPause(toSeconds(wbConfig.break));
+
+                    } else {
+                        finish();
+                    }
                 }
 
             }, 1000);
@@ -119,22 +238,30 @@ function startClock()
                     emomCountDown = emomSeconds;
                     emomRound = 1;
                 }
-                defaultStart();
 
                 emomCountDown--;
+                defaultStart();
 
                 if (emomCountDown <= 3) {
                     $('#wodbuddy-box').addClass('bg-danger');
                 }
 
-                if (emomCountDown <= 0 && emomRound <= 3) {
+                if (emomCountDown <= 0 && emomRound < wbConfig.round) {
                     emomCountDown = emomSeconds;
                     emomRound++;
 
                     ding();
 
                 } else if (emomCountDown <= 0) {
-                    finish();
+                    repeatCounter++;
+
+                    if (repeatCounter < wbConfig.repeat) {
+                        emomRound = 0;
+                        startPause(toSeconds(wbConfig.break));
+
+                    } else {
+                        finish();
+                    }
                 }
 
             }, 1000);
@@ -149,7 +276,9 @@ function startClock()
                     tabataRound++;
                 }
 
+                tabataCountDown--;
                 displayClock();
+
                 $('#wodbuddy-box').removeClass('bg-danger');
                 $('#wodbuddy-box').removeClass('bg-success');
                 $('#wodbuddy-pause').show();
@@ -158,35 +287,54 @@ function startClock()
                     $('#wodbuddy-box').addClass('bg-danger');
                 }
 
-                if (tabataCountDown <= 0 && tabataRound < 4) {
-                    tabataPause = 10;
+                if (tabataCountDown <= 0 && tabataRound < 8) {
                     tabataCountDown = tabataInterval;
                     tabataRound++;
 
                     ding();
 
+                    startPause(tabataPause);
+
                 } else if (tabataCountDown <= 0) {
-                    finish();
-                }
+                    repeatCounter++;
 
-                if (tabataPause > 0) {
-                    tabataPause--;
+                    if (repeatCounter < wbConfig.repeat) {
+                        tabataRound = 0;
+                        startPause(toSeconds(wbConfig.break));
 
-                    if (tabataPause == 0) ding();
-
-                } else {
-                    tabataCountDown--;
+                    } else {
+                        finish();
+                    }
                 }
 
             }, 1000);
 
             break;
-
-        default:
-            $('#wodbuddy-clock').html('not supported');
-
-            break;
     }
+}
+
+function startPause(seconds)
+{
+    clearInterval(timerInterval);
+
+    start = seconds;
+
+    var x = setInterval(function() {
+        start--;
+
+        var text = moment()
+            .startOf('day')
+            .seconds(start)
+            .format('HH:mm:ss');
+
+        $('#wodbuddy-clock').html('Pause<br>'+text);
+
+        if (start <= 0) {
+            clearInterval(x);
+            startClock();
+        }
+
+    }, 1000);
 }
 
 function ding()
@@ -223,7 +371,7 @@ function displayClock()
     var seconds = null;
     var header = null;
 
-    switch (type) {
+    switch (wbConfig.type) {
         case 'clock':
             seconds = clockCounter;
             break;
@@ -239,13 +387,8 @@ function displayClock()
             break;
 
         case 'tabata':
-            if (tabataPause > 0) {
-                header = 'Pause<br>';
-                seconds = tabataPause;
-            } else {
-                header = 'Round: '+tabataRound+'<br>';
-                seconds = tabataCountDown;
-            }
+            header = 'Round: '+tabataRound+'<br>';
+            seconds = tabataCountDown;
 
             break;
     }
@@ -262,31 +405,18 @@ function displayClock()
     $('#wodbuddy-clock').html(text);
 }
 
-$('#wodbuddy-pause').on('click', function() {
-    $('#wodbuddy-pause').hide();
-    $('#wodbuddy-reset').show();
-    $('#wodbuddy-start').show();
+function toSeconds(input)
+{
+    if (input === undefined) return 0;
 
-    clearInterval(timerInterval);
-});
+    var o = input.split(':');
 
-$('#wodbuddy-reset').on('click', function() {
-    $('#wodbuddy-pause').hide();
-    $('#wodbuddy-reset').hide();
-    $('#wodbuddy-start').show();
+    m = parseInt(o[0]);
+    s = parseInt(o[1]);
 
-    clockCounter = 0;
+    seconds = 0;
+    seconds = seconds+m*60;
+    seconds = seconds+s;
 
-    displayClock()
-});
-
-$('#wodbuddy-start').on('click', function() {
-    $('#wodbuddy-reset').hide();
-    $('#wodbuddy-start').hide();
-
-    startClock();
-});
-
-$('#wodbuddy-finish').on('click', function() {
-    finish();
-});
+    return seconds;
+}

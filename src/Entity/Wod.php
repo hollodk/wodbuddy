@@ -59,6 +59,11 @@ class Wod
      */
     private $participants;
 
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $attribute;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -199,5 +204,26 @@ class Wod
         }
 
         return $this;
+    }
+
+    public function getAttribute(): ?string
+    {
+        return $this->attribute;
+    }
+
+    public function setAttribute(?string $attribute): self
+    {
+        $this->attribute = $attribute;
+
+        return $this;
+    }
+
+    public function getConfig($input)
+    {
+        $attribute = json_decode($this->getAttribute());
+
+        return (isset($attribute->$input))
+            ? $attribute->$input
+            : null;
     }
 }

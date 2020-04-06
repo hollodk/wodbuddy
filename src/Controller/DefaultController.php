@@ -101,11 +101,29 @@ class DefaultController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $attr = [
+                'delay' => 5,
+                'type' => $wod->getTimer(),
+            ];
+
+            switch ($wod->getTimer()) {
+            case 'timer':
+                $attr['time'] = '10:00';
+                break;
+
+            case 'emom':
+                $attr['emomtime'] = '01:00';
+                $attr['round'] = 12;
+                break;
+            }
+
+            $wod->setAttribute(json_encode($attr));
+
             $em->persist($wod);
             $em->flush();
 
-            return $this->redirectToRoute('app_default_organization', [
-                'id' => $organization->getId(),
+            return $this->redirectToRoute('app_default_wod', [
+                'id' => $wod->getId(),
             ]);
         }
 
@@ -117,10 +135,26 @@ class DefaultController extends AbstractController
     }
 
     /**
+     * @Route("/{id}/wod-delete")
+     */
+    public function woddelete(Request $request, Wod $wod)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $em->remove($wod);
+        $em->flush();
+
+        return $this->redirectToRoute('app_default_organization', [
+            'id' => $wod->getOrganization()->getId(),
+        ]);
+    }
+
+    /**
      * @Route("/{id}/wod")
      */
     public function wod(Request $request, Wod $wod)
     {
+        $wod->getConfig('timer');
         $em = $this->getDoctrine()->getManager();
         $session = $request->getSession();
 
@@ -163,10 +197,44 @@ class DefaultController extends AbstractController
 
         return $this->render('default/wod.html.twig', [
             'wod' => $wod,
+            'attribute' => json_decode($wod->getAttribute()),
             'organization' => $wod->getOrganization(),
             'form' => $form->createView(),
             'participants' => $participants,
             'participant' => $participant,
+        ]);
+    }
+
+    /**
+     * @Route("/{id}/timer")
+     */
+    public function timer(Request $request, Wod $wod)
+    {
+        $data = $request->request->all();
+
+        $wod->setTimer($data['type']);
+        $wod->setAttribute(json_encode($data));
+
+        $em = $this->getDoctrine()->getManager();
+        $em->flush();
+
+        return $this->redirectToRoute('app_default_wod', [
+            'id' => $wod->getId(),
+        ]);
+    }
+
+    /**
+     * @Route("/{id}/start")
+     */
+    public function start(Request $request, Wod $wod)
+    {
+        $memcached = new \Memcached();
+        $memcached->addServer('localhost', '11211');
+
+        $memcached->set('wod_status_'.$wod->getId(), true, 15);
+
+        return $this->redirectToRoute('app_default_wod', [
+            'id' => $wod->getId(),
         ]);
     }
 }

@@ -11,13 +11,19 @@ var pingUrl = '';
 {% endif %}
 
 var participantsUrl = '{{ path('app_api_participants', {'id':wod.id}) }}';
+var readyUrl = '{{ path('app_api_ready', {'id':wod.id}) }}';
+var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
 </script>
 <script src="{{ asset('js/wodbuddy.clock.js') }}?v={{ random() }}"></script>
 {% endblock %}
 
 {% block body %}
 <div class="example-wrapper">
-    <h1>Hello {{ wod.name }}</h1>
+    <h1>Hello {{ participant ? participant.name : 'Guest' }}</h1>
+
+    <div class="mb-2">
+        <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#exampleModal">Configure timer</span>
+    </div>
 
     <div class="row">
         <div class="col-sm-6">
@@ -27,6 +33,22 @@ var participantsUrl = '{{ path('app_api_participants', {'id':wod.id}) }}';
                 </div>
                 <div class="card-body">
                     {{ wod.description|nl2br }}
+                    <hr>
+                    {% if wod.timer == 'clock' %}
+                    <b>For time</b>
+
+                    {% elseif wod.timer == 'timer' %}
+                    <b>Timecap</b>, <b>{{ wod.config('time') }}</b> minutes.
+                    {% if wod.config('repeat') > 1 %}<br>Repeat <b>{{ wod.config('repeat') }}</b> times, with <b>{{ wod.config('break') }}</b> minutes break.{% endif %}
+
+                    {% elseif wod.timer == 'tabata' %}
+                    <b>Tabata</b>
+                    {% if wod.config('repeat') > 1 %}<br>Repeat <b>{{ wod.config('repeat') }}</b> times, with <b>{{ wod.config('break') }}</b> minutes break.{% endif %}
+
+                    {% elseif wod.timer == 'emom' %}
+                    <b>EMOM</b>, every <b>{{ wod.config('emomtime') }}</b> minute for <b>{{ wod.config('round') }}</b> rounds.
+                    {% if wod.config('repeat') > 1 %}<br>Repeat <b>{{ wod.config('repeat') }}</b> times, with <b>{{ wod.config('break') }}</b> minutes break.{% endif %}
+                    {% endif %}
                 </div>
                 {% if wod.name %}
                 <div class="card-footer">
@@ -41,10 +63,7 @@ var participantsUrl = '{{ path('app_api_participants', {'id':wod.id}) }}';
                 </div>
                 <div class="card-body text-center">
                     <div class="mb-2">
-                        <span class="btn btn-primary wodbuddy-timer-type" data-type="clock">Clock</span>
-                        <span class="btn btn-primary wodbuddy-timer-type" data-type="timer">Timer</span>
-                        <span class="btn btn-primary wodbuddy-timer-type" data-type="tabata">Tabata</span>
-                        <span class="btn btn-primary wodbuddy-timer-type" data-type="emom">EMOM</span>
+                        <span class="btn btn-primary" id="wodbuddy-begin">Start workout</span>
                     </div>
 
                     <span class="h1" id="wodbuddy-clock">Waiting to start</span>
@@ -67,6 +86,9 @@ var participantsUrl = '{{ path('app_api_participants', {'id':wod.id}) }}';
                 </div>
                 <div class="card-body">
                     <a class="btn btn-primary" href="{{ path('app_default_organization', {'id':organization.id}) }}">Go back to {{ organization.name }}</a>
+                    <a onclick="return confirm('Are you sure?')" class="btn btn-primary" href="{{ path('app_default_start', {'id':wod.id}) }}">Start WOD</a>
+                    <hr>
+                    <a onclick="return confirm('Are you sure?')" class="btn btn-danger" href="{{ path('app_default_woddelete', {'id':wod.id}) }}">Delete WOD</a>
                 </div>
             </div>
 
@@ -96,4 +118,123 @@ var participantsUrl = '{{ path('app_api_participants', {'id':wod.id}) }}';
         </div>
     </div>
 </div>
+
+<form action="{{ path('app_default_timer', {'id':wod.id}) }}" method="post">
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Configure timer</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" id="modal-type">
+                    <label>Type:</label>
+                    <select name="type" id="modal-form-type" class="form-control">
+                        <option {% if wod.timer == 'clock' %}selected{% endif %} value="clock">Clock</option>
+                        <option {% if wod.timer == 'timer' %}selected{% endif %} value="timer">Timer</option>
+                        <option {% if wod.timer == 'tabata' %}selected{% endif %} value="tabata">Tabata</option>
+                        <option {% if wod.timer == 'emom' %}selected{% endif %} value="emom">EMOM</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="modal-delay">
+                    <label>Start delay:</label>
+                    <select name="delay" class="form-control">
+                        <option {% if wod.config('delay') == '5' %}selected{% endif %} value="5">5 seconds</option>
+                        <option {% if wod.config('delay') == '10' %}selected{% endif %} value="10">10 seconds</option>
+                        <option {% if wod.config('delay') == '20' %}selected{% endif %} value="20">20 seconds</option>
+                        <option {% if wod.config('delay') == '30' %}selected{% endif %} value="30">30 seconds</option>
+                        <option {% if wod.config('delay') == '60' %}selected{% endif %} value="60">60 seconds</option>
+                    </select>
+                    <small class="text-muted">Delay before the workout start.</small>
+                </div>
+
+                <div class="form-group" id="modal-time">
+                    <label>Set time:</label>
+                    <input name="time" class="form-control" type="text" placeholder="15:30 is 15 minutes and 30 seconds" value="{{ wod.config('time') }}">
+                    <small class="text-muted">How many minutes would you like your workout.</small>
+                </div>
+
+                <div class="form-group" id="modal-emomtime">
+                    <label>Set every:</label>
+                    <select name="emomtime" class="form-control">
+                        <option {% if wod.config('emomtime') == '01:00' %}selected{% endif %} value="01:00">1 min</option>
+                        <option {% if wod.config('emomtime') == '02:00' %}selected{% endif %} value="02:00">2 min</option>
+                        <option {% if wod.config('emomtime') == '03:00' %}selected{% endif %} value="03:00">3 min</option>
+                        <option {% if wod.config('emomtime') == '04:00' %}selected{% endif %} value="04:00">4 min</option>
+                        <option {% if wod.config('emomtime') == '05:00' %}selected{% endif %} value="05:00">5 min</option>
+                    </select>
+                    <small class="text-muted">How much time should each round last.</small>
+                </div>
+
+                <div class="form-group" id="modal-round">
+                    <label>Rounds:</label>
+                    <select name="round" class="form-control">
+                        <option {% if wod.config('round') == '1' %}selected{% endif %} value="1">1</option>
+                        <option {% if wod.config('round') == '2' %}selected{% endif %} value="2">2</option>
+                        <option {% if wod.config('round') == '3' %}selected{% endif %} value="3">3</option>
+                        <option {% if wod.config('round') == '4' %}selected{% endif %} value="4">4</option>
+                        <option {% if wod.config('round') == '5' %}selected{% endif %} value="5">5</option>
+                        <option {% if wod.config('round') == '6' %}selected{% endif %} value="6">6</option>
+                        <option {% if wod.config('round') == '7' %}selected{% endif %} value="7">7</option>
+                        <option {% if wod.config('round') == '8' %}selected{% endif %} value="8">8</option>
+                        <option {% if wod.config('round') == '9' %}selected{% endif %} value="9">9</option>
+                        <option {% if wod.config('round') == '10' %}selected{% endif %} value="10">10</option>
+                        <option {% if wod.config('round') == '11' %}selected{% endif %} value="11">11</option>
+                        <option {% if wod.config('round') == '12' %}selected{% endif %} value="12">12</option>
+                        <option {% if wod.config('round') == '13' %}selected{% endif %} value="13">13</option>
+                        <option {% if wod.config('round') == '14' %}selected{% endif %} value="14">14</option>
+                        <option {% if wod.config('round') == '15' %}selected{% endif %} value="15">15</option>
+                        <option {% if wod.config('round') == '16' %}selected{% endif %} value="16">16</option>
+                        <option {% if wod.config('round') == '17' %}selected{% endif %} value="17">17</option>
+                        <option {% if wod.config('round') == '18' %}selected{% endif %} value="18">18</option>
+                        <option {% if wod.config('round') == '19' %}selected{% endif %} value="19">19</option>
+                        <option {% if wod.config('round') == '20' %}selected{% endif %} value="20">20</option>
+                        <option {% if wod.config('round') == '21' %}selected{% endif %} value="21">21</option>
+                        <option {% if wod.config('round') == '22' %}selected{% endif %} value="22">22</option>
+                        <option {% if wod.config('round') == '23' %}selected{% endif %} value="23">23</option>
+                        <option {% if wod.config('round') == '24' %}selected{% endif %} value="24">24</option>
+                        <option {% if wod.config('round') == '25' %}selected{% endif %} value="25">25</option>
+                        <option {% if wod.config('round') == '26' %}selected{% endif %} value="26">26</option>
+                        <option {% if wod.config('round') == '27' %}selected{% endif %} value="27">27</option>
+                        <option {% if wod.config('round') == '28' %}selected{% endif %} value="28">28</option>
+                        <option {% if wod.config('round') == '29' %}selected{% endif %} value="29">29</option>
+                    </select>
+                    <small class="text-muted">How many rounds would you like, in tabata 1 round a full tabata.</small>
+                </div>
+
+                <div class="form-group" id="modal-repeat">
+                    <label>Repeat:</label>
+                    <select name="repeat" class="form-control">
+                        <option {% if wod.config('repeat') == '1' %}selected{% endif %} value="1">1</option>
+                        <option {% if wod.config('repeat') == '2' %}selected{% endif %} value="2">2</option>
+                        <option {% if wod.config('repeat') == '3' %}selected{% endif %} value="3">3</option>
+                        <option {% if wod.config('repeat') == '4' %}selected{% endif %} value="4">4</option>
+                        <option {% if wod.config('repeat') == '5' %}selected{% endif %} value="5">5</option>
+                        <option {% if wod.config('repeat') == '6' %}selected{% endif %} value="6">6</option>
+                        <option {% if wod.config('repeat') == '7' %}selected{% endif %} value="7">7</option>
+                        <option {% if wod.config('repeat') == '8' %}selected{% endif %} value="8">8</option>
+                        <option {% if wod.config('repeat') == '9' %}selected{% endif %} value="9">9</option>
+                        <option {% if wod.config('repeat') == '10' %}selected{% endif %} value="10">10</option>
+                    </select>
+                    <small class="text-muted">How many times to repeat rounds.</small>
+                </div>
+
+                <div class="form-group" id="modal-break">
+                    <label>Break:</label>
+                    <input name="break" class="form-control" type="text" placeholder="02:15 is 2 minutes and 15 seconds" value="{{ wod.config('break') }}">
+                    <small class="text-muted">How much time between break.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
 {% endblock %}
