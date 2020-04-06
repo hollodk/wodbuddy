@@ -91,7 +91,6 @@ $('#wodbuddy-finish').on('click', function() {
 function startMonitor()
 {
     if (monitorStarted == false) {
-        console.log('eeh');
         monitorStarted = true;
 
         readyInterval = setInterval(function() {
@@ -107,6 +106,7 @@ function startMonitor()
 
 function initStart()
 {
+    monitorStarted = true;
     $('#wodbuddy-begin').hide();
 
     $('#wodbuddy-clock').html('Starting in '+startDelay+' seconds');
@@ -175,7 +175,10 @@ function updateParticipants()
         $('#participant-box').html('');
 
         if (data.participants.length > 1) {
+            $('#start-wod-btn').show();
             startMonitor();
+        } else {
+            $('#start-wod-btn').hide();
         }
 
         $.each(data.participants, function(key, value) {

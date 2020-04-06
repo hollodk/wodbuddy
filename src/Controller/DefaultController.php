@@ -141,6 +141,10 @@ class DefaultController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
+        foreach ($wod->getParticipants() as $p) {
+            $em->remove($p);
+        }
+
         $em->remove($wod);
         $em->flush();
 

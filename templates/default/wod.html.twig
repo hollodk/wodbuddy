@@ -86,9 +86,15 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
                 </div>
                 <div class="card-body">
                     <a class="btn btn-primary" href="{{ path('app_default_organization', {'id':organization.id}) }}">Go back to {{ organization.name }}</a>
-                    <a onclick="return confirm('Are you sure?')" class="btn btn-primary" href="{{ path('app_default_start', {'id':wod.id}) }}">Start WOD</a>
                     <hr>
-                    <a onclick="return confirm('Are you sure?')" class="btn btn-danger" href="{{ path('app_default_woddelete', {'id':wod.id}) }}">Delete WOD</a>
+                    <div class="row">
+                        <div class="col-6">
+                            <a id="start-wod-btn" onclick="return confirm('Are you sure?')" class="btn btn-primary" href="{{ path('app_default_start', {'id':wod.id}) }}">Start WOD for all</a>
+                        </div>
+                        <div class="col-6 text-right">
+                            <a onclick="return confirm('Are you sure?')" class="btn btn-danger" href="{{ path('app_default_woddelete', {'id':wod.id}) }}">Delete WOD</a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
