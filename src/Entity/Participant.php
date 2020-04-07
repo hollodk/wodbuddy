@@ -42,6 +42,11 @@ class Participant
      */
     private $lastSeenAt;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="participants")
+     */
+    private $user;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -120,6 +125,18 @@ class Participant
     public function setLastSeenAt(\DateTimeInterface $lastSeenAt): self
     {
         $this->lastSeenAt = $lastSeenAt;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

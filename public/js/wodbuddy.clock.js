@@ -25,6 +25,8 @@ var timerInterval = null;
 var readyInterval = null;
 var monitorStarted = false;
 
+loadaudio();
+
 // modal-form
 $(document).ready(function() {
     updateModal();
@@ -116,6 +118,7 @@ function initStart()
         $('#wodbuddy-clock').html('Starting in '+startDelay+' seconds');
 
         if (startDelay <= 3) {
+            play(startDelay);
             $('#wodbuddy-box').addClass('bg-danger');
         }
 
@@ -123,6 +126,7 @@ function initStart()
             clearInterval(x);
             startClock();
         }
+
     }, 1000);
 }
 
@@ -193,7 +197,7 @@ function updateParticipants()
 
 function startClock()
 {
-    ding();
+    play('go');
 
     switch (wbConfig.type) {
         case 'clock':
@@ -201,7 +205,7 @@ function startClock()
                 clockCounter++;
                 defaultStart();
 
-                if ((clockCounter%60) == 0) ding();
+                if ((clockCounter%60) == 0) play('go');
                 $('#wodbuddy-finish').show();
 
             }, 1000);
@@ -213,9 +217,8 @@ function startClock()
                 countDown--;
                 defaultStart();
 
-                if ((countDown%60) == 0) ding();
-
                 if (countDown <= 3) {
+                    play(countDown);
                     $('#wodbuddy-box').addClass('bg-danger');
                 }
 
@@ -246,6 +249,7 @@ function startClock()
                 defaultStart();
 
                 if (emomCountDown <= 3) {
+                    play(emomCountDown);
                     $('#wodbuddy-box').addClass('bg-danger');
                 }
 
@@ -253,7 +257,7 @@ function startClock()
                     emomCountDown = emomSeconds;
                     emomRound++;
 
-                    ding();
+                    play('go');
 
                 } else if (emomCountDown <= 0) {
                     repeatCounter++;
@@ -287,14 +291,13 @@ function startClock()
                 $('#wodbuddy-pause').show();
 
                 if (tabataCountDown <= 3) {
+                    play(tabataCountDown);
                     $('#wodbuddy-box').addClass('bg-danger');
                 }
 
                 if (tabataCountDown <= 0 && tabataRound < 8) {
                     tabataCountDown = tabataInterval;
                     tabataRound++;
-
-                    ding();
 
                     startPause(tabataPause);
 
@@ -318,6 +321,10 @@ function startClock()
 
 function startPause(seconds)
 {
+    if (seconds == 0) return;
+
+    play('break');
+
     clearInterval(timerInterval);
 
     start = seconds;
@@ -332,6 +339,10 @@ function startPause(seconds)
 
         $('#wodbuddy-clock').html('Pause<br>'+text);
 
+        if (start <= 3) {
+            play(start);
+        }
+
         if (start <= 0) {
             clearInterval(x);
             startClock();
@@ -340,9 +351,27 @@ function startPause(seconds)
     }, 1000);
 }
 
-function ding()
+function loadaudio()
 {
-    var audio = new Audio('http://wodbuddy.fly-mailers.space/audio/ding.mp3');
+    var audio = new Audio('http://wodbuddy.fly-mailers.space/audio/go.mp3');
+    audio.load();
+    audio = new Audio('http://wodbuddy.fly-mailers.space/audio/gw.mp3');
+    audio.load();
+    audio = new Audio('http://wodbuddy.fly-mailers.space/audio/break.mp3');
+    audio.load();
+    audio = new Audio('http://wodbuddy.fly-mailers.space/audio/1.mp3');
+    audio.load();
+    audio = new Audio('http://wodbuddy.fly-mailers.space/audio/2.mp3');
+    audio.load();
+    audio = new Audio('http://wodbuddy.fly-mailers.space/audio/3.mp3');
+    audio.load();
+}
+
+function play(file)
+{
+    if (file == 0) return;
+
+    var audio = new Audio('http://wodbuddy.fly-mailers.space/audio/'+file+'.mp3');
     audio.play();
 }
 
@@ -366,7 +395,7 @@ function finish()
     $('#wodbuddy-start').hide();
     $('#wodbuddy-finish').hide();
 
-    ding();
+    play('gw');
 }
 
 function displayClock()
@@ -410,7 +439,7 @@ function displayClock()
 
 function toSeconds(input)
 {
-    if (input === undefined) return 0;
+    if (input == '' || input === undefined) return 0;
 
     var o = input.split(':');
 

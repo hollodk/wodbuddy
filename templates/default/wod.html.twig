@@ -18,110 +18,130 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
 {% endblock %}
 
 {% block body %}
-<div class="example-wrapper">
-    <h1>Hello {{ participant ? participant.name : 'Guest' }}</h1>
+<h1>Hello {{ participant ? participant.name : 'Guest' }}</h1>
 
-    <div class="mb-2">
-        <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#exampleModal">Configure timer</span>
-    </div>
+<div class="mb-2">
+    <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#exampleModal">Configure timer</span>
+    <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#wodModal">Configure wod</span>
+</div>
 
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="card mb-2">
-                <div class="card-header">
-                    Start at: {{ wod.startAt|date('Y/m/d H:i') }}
-                </div>
-                <div class="card-body">
-                    {{ wod.description|nl2br }}
-                    <hr>
-                    {% if wod.timer == 'clock' %}
-                    <b>For time</b>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="card mb-2">
+            <div class="card-header">
+                Start at: {{ wod.startAt|date('Y/m/d H:i') }}
+            </div>
+            <div class="card-body">
+                {{ wod.description|nl2br }}
+                <hr>
+                {% if wod.timer == 'clock' %}
+                <b>For time</b>
 
-                    {% elseif wod.timer == 'timer' %}
-                    <b>Timecap</b>, <b>{{ wod.config('time') }}</b> minutes.
-                    {% if wod.config('repeat') > 1 %}<br>Repeat <b>{{ wod.config('repeat') }}</b> times, with <b>{{ wod.config('break') }}</b> minutes break.{% endif %}
+                {% elseif wod.timer == 'timer' %}
+                <b>Timecap</b>, <b>{{ wod.config('time') }}</b> minutes.
+                {% if wod.config('repeat') > 1 %}<br>Repeat <b>{{ wod.config('repeat') }}</b> times, with <b>{{ wod.config('break') }}</b> minutes break.{% endif %}
 
-                    {% elseif wod.timer == 'tabata' %}
-                    <b>Tabata</b>
-                    {% if wod.config('repeat') > 1 %}<br>Repeat <b>{{ wod.config('repeat') }}</b> times, with <b>{{ wod.config('break') }}</b> minutes break.{% endif %}
+                {% elseif wod.timer == 'tabata' %}
+                <b>Tabata</b>
+                {% if wod.config('repeat') > 1 %}<br>Repeat <b>{{ wod.config('repeat') }}</b> times, with <b>{{ wod.config('break') }}</b> minutes break.{% endif %}
 
-                    {% elseif wod.timer == 'emom' %}
-                    <b>EMOM</b>, every <b>{{ wod.config('emomtime') }}</b> minute for <b>{{ wod.config('round') }}</b> rounds.
-                    {% if wod.config('repeat') > 1 %}<br>Repeat <b>{{ wod.config('repeat') }}</b> times, with <b>{{ wod.config('break') }}</b> minutes break.{% endif %}
-                    {% endif %}
-                </div>
-                {% if wod.name %}
-                <div class="card-footer">
-                    <b>{{ wod.name }}</b>
-                </div>
+                {% elseif wod.timer == 'emom' %}
+                <b>EMOM</b>, every <b>{{ wod.config('emomtime') }}</b> minute for <b>{{ wod.config('round') }}</b> rounds.
+                {% if wod.config('repeat') > 1 %}<br>Repeat <b>{{ wod.config('repeat') }}</b> times, with <b>{{ wod.config('break') }}</b> minutes break.{% endif %}
                 {% endif %}
             </div>
-
-            <div class="card" id="wodbuddy-box">
-                <div class="card-header">
-                    Timer
-                </div>
-                <div class="card-body text-center">
-                    <div class="mb-2">
-                        <span class="btn btn-primary" id="wodbuddy-begin">Start workout</span>
-                    </div>
-
-                    <span class="h1" id="wodbuddy-clock">Waiting to start</span>
-                    <hr>
-                    <span class="btn btn-block btn-lg btn-primary" id="wodbuddy-finish">FINISH</span>
-                </div>
-
-                <div class="card-footer text-right">
-                    <span class="btn btn-primary" id="wodbuddy-pause">pause</span>
-                    <span class="btn btn-danger" id="wodbuddy-reset">reset</span>
-                    <span class="btn btn-primary" id="wodbuddy-start">start</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-6">
-            <div class="card mb-2">
-                <div class="card-header">
-                    Organization
-                </div>
-                <div class="card-body">
-                    <a class="btn btn-primary" href="{{ path('app_default_organization', {'id':organization.id}) }}">Go back to {{ organization.name }}</a>
-                    <hr>
-                    <div class="row">
-                        <div class="col-6">
-                            <a id="start-wod-btn" onclick="return confirm('Are you sure?')" class="btn btn-primary" href="{{ path('app_default_start', {'id':wod.id}) }}">Start WOD for all</a>
-                        </div>
-                        <div class="col-6 text-right">
-                            <a onclick="return confirm('Are you sure?')" class="btn btn-danger" href="{{ path('app_default_woddelete', {'id':wod.id}) }}">Delete WOD</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {% if participant == null %}
-            <div class="card mb-2">
-                <div class="card-header">
-                    Join Workout
-                </div>
-                <div class="card-body">
-                    {{ form_start(form) }}
-                    {{ form_row(form.name) }}
-                    <button class="btn btn-primary" type="submit">Join</button>
-                    {{ form_end(form) }}
-                </div>
+            {% if wod.name %}
+            <div class="card-footer">
+                <b>{{ wod.name }}</b>
             </div>
             {% endif %}
+        </div>
 
-            <div class="card">
-                <div class="card-header">
-                    Participants
+        <div class="card mb-2" id="wodbuddy-box">
+            <div class="card-header">
+                Timer
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-2">
+                    <span class="btn btn-primary" id="wodbuddy-begin">Start workout</span>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-striped" id="participant-box">
-                    </table>
-                </div>
+
+                <span class="h1" id="wodbuddy-clock">Waiting to start</span>
+                <hr>
+                <span class="btn btn-block btn-lg btn-primary" id="wodbuddy-finish">FINISH</span>
+            </div>
+
+            <div class="card-footer text-right">
+                <span class="btn btn-primary" id="wodbuddy-pause">pause</span>
+                <span class="btn btn-danger" id="wodbuddy-reset">reset</span>
+                <span class="btn btn-primary" id="wodbuddy-start">start</span>
             </div>
         </div>
+    </div>
+
+    <div class="col-sm-6">
+        <div class="card mb-2">
+            <div class="card-header">
+                Organization
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <tr>
+                        <th>Organization</th>
+                        <td class="text-right"><a href="{{ path('app_default_organization', {'id':organization.id}) }}">{{ wod.organization.name }}</a></td>
+                    </tr>
+                    {% if wod.stream %}
+                    <tr>
+                        <th>Stream Link</th>
+                        <td class="text-right"><a href="{{ wod.stream }}">link</a></td>
+                    </tr>
+                    {% endif %}
+                </table>
+
+                 <a id="start-wod-btn" onclick="return confirm('Are you sure?')" class="btn btn-primary" href="{{ path('app_default_start', {'id':wod.id}) }}">Start WOD for all</a>
+            </div>
+        </div>
+
+        {% if participant == null %}
+        <div class="card mb-2">
+            <div class="card-header">
+                Join Workout
+            </div>
+            <div class="card-body">
+                {{ form_start(form) }}
+                {{ form_row(form.name) }}
+                <button class="btn btn-primary" type="submit">Join</button>
+                {{ form_end(form) }}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card mb-2">
+            <div class="card-header">
+                Participants
+            </div>
+            {% if is_granted('IS_AUTHENTICATED_REMEMBERED') == false %}
+            <div class="card-body">
+                <p>Remember that you can <a href="{{ path('app_register') }}">create a free profile</a> and track your progress.</p>
+            </div>
+            {% endif %}
+            <div class="table-responsive">
+                <table class="table table-striped" id="participant-box">
+                </table>
+            </div>
+        </div>
+
+        {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+        <div class="card mb-2">
+            <div class="card-header">
+                Delete WOD
+            </div>
+            <div class="card-body">
+                <p>If you want to delete this workout, click on the button below</p>
+                <a onclick="return confirm('Are you sure?')" class="btn btn-danger" href="{{ path('app_default_woddelete', {'id':wod.id}) }}">Delete WOD</a>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -243,4 +263,27 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
     </div>
 </div>
 </form>
+
+<form action="{{ path('app_default_edit', {'id':wod.id}) }}" method="post">
+<div class="modal fade" id="wodModal" tabindex="-1" role="dialog" aria-labelledby="wodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="wodModalLabel">Configure timer</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {{ form_row(wod_form) }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{ form_end(wod_form) }}
+
 {% endblock %}

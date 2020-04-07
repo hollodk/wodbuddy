@@ -173,6 +173,8 @@ class DefaultController extends AbstractController
             ['name' => 'ASC']
         );
 
+        $wodForm = $this->createForm(WodType::class, $wod);
+
         $form = $this->createFormBuilder()
             ->add('name')
             ->getForm()
@@ -183,13 +185,23 @@ class DefaultController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            $participant = new Participant();
-            $participant->setWod($wod);
-            $participant->setName($data['name']);
-            $participant->setLastSeenAt(new \DateTime());
+            if ($this->getUser()) {
+                $participant = $em->getRepository('App:Participant')->findOneBy([
+                    'user' => $this->getUser(),
+                    'wod' => $wod,
+                ]);
+            }
 
-            $em->persist($participant);
-            $em->flush();
+            if (!$participant) {
+                $participant = new Participant();
+                $participant->setUser($this->getUser());
+                $participant->setWod($wod);
+                $participant->setName($data['name']);
+                $participant->setLastSeenAt(new \DateTime());
+
+                $em->persist($participant);
+                $em->flush();
+            }
 
             $request->getSession()->set($key, $participant->getId());
 
@@ -204,6 +216,7 @@ class DefaultController extends AbstractController
             'attribute' => json_decode($wod->getAttribute()),
             'organization' => $wod->getOrganization(),
             'form' => $form->createView(),
+            'wod_form' => $wodForm->createView(),
             'participants' => $participants,
             'participant' => $participant,
         ]);
@@ -221,6 +234,25 @@ class DefaultController extends AbstractController
 
         $em = $this->getDoctrine()->getManager();
         $em->flush();
+
+        return $this->redirectToRoute('app_default_wod', [
+            'id' => $wod->getId(),
+        ]);
+    }
+
+    /**
+     * @Route("/{id}/edit")
+     */
+    public function edit(Request $request, Wod $wod)
+    {
+        $form = $this->createForm(WodType::class, $wod);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($wod);
+            $em->flush();
+        }
 
         return $this->redirectToRoute('app_default_wod', [
             'id' => $wod->getId(),

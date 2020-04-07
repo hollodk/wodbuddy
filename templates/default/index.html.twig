@@ -8,27 +8,25 @@
     .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
 </style>
 
-<div class="example-wrapper">
-    <h1>Hello Guest! ✅</h1>
+<h1>Hello Guest! ✅</h1>
 
-    <div class="row">
-        <div class="col-sm-6">
-            <h3>Join Organization</h3>
-            {{ form_start(join_form) }}
-            {{ form_row(join_form.name) }}
-            <button type="submit">Sign in</button>
-            {{ form_end(join_form) }}
-        </div>
+<div class="row">
+    <div class="col-sm-6">
+        <h3>Join Organization</h3>
+        {{ form_start(join_form) }}
+        {{ form_row(join_form.name) }}
+        <button type="submit">Sign in</button>
+        {{ form_end(join_form) }}
+    </div>
 
-        <div class="col-sm-6">
-            <h3>Create Organization</h3>
+    <div class="col-sm-6">
+        <h3>Create Organization</h3>
 
-            {{ form_start(organization_form) }}
-            {{ form_row(organization_form.name) }}
-            {{ form_row(organization_form.email) }}
-            <button type="submit">Sign up</button>
-            {{ form_end(organization_form) }}
-        </div>
+        {{ form_start(organization_form) }}
+        {{ form_row(organization_form.name) }}
+        {{ form_row(organization_form.email) }}
+        <button type="submit">Sign up</button>
+        {{ form_end(organization_form) }}
     </div>
 </div>
 {% endblock %}

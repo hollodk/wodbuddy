@@ -15,6 +15,7 @@ class WodType extends AbstractType
         $builder
             ->add('startAt')
             ->add('name')
+            ->add('stream')
             ->add('timer', ChoiceType::class, [
                 'choices' => [
                     'Clock' => 'clock',

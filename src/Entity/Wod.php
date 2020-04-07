@@ -64,6 +64,11 @@ class Wod
      */
     private $attribute;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $stream;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -225,5 +230,17 @@ class Wod
         return (isset($attribute->$input))
             ? $attribute->$input
             : null;
+    }
+
+    public function getStream(): ?string
+    {
+        return $this->stream;
+    }
+
+    public function setStream(?string $stream): self
+    {
+        $this->stream = $stream;
+
+        return $this;
     }
 }
