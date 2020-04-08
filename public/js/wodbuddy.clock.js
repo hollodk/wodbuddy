@@ -450,19 +450,19 @@ function startPause(seconds)
 
 function loadAudio()
 {
-    var audio = new Audio('http://wodbuddy.fly-mailers.space/audio/go.mp3');
+    var audio = new Audio(audioAssets+'/go.mp3');
     audio.load();
-    audio = new Audio('http://wodbuddy.fly-mailers.space/audio/gw.mp3');
+    audio = new Audio(audioAssets+'/gw.mp3');
     audio.load();
-    audio = new Audio('http://wodbuddy.fly-mailers.space/audio/ding.mp3');
+    audio = new Audio(audioAssets+'/ding.mp3');
     audio.load();
-    audio = new Audio('http://wodbuddy.fly-mailers.space/audio/break.mp3');
+    audio = new Audio(audioAssets+'/break.mp3');
     audio.load();
-    audio = new Audio('http://wodbuddy.fly-mailers.space/audio/1.mp3');
+    audio = new Audio(audioAssets+'/1.mp3');
     audio.load();
-    audio = new Audio('http://wodbuddy.fly-mailers.space/audio/2.mp3');
+    audio = new Audio(audioAssets+'/2.mp3');
     audio.load();
-    audio = new Audio('http://wodbuddy.fly-mailers.space/audio/3.mp3');
+    audio = new Audio(audioAssets+'/3.mp3');
     audio.load();
 }
 
@@ -470,7 +470,7 @@ function play(file)
 {
     if (file == 0) return;
 
-    var audio = new Audio('http://wodbuddy.fly-mailers.space/audio/'+file+'.mp3');
+    var audio = new Audio(audioAssets+'/'+file+'.mp3');
     audio.play();
 }
 

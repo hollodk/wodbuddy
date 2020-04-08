@@ -7,6 +7,7 @@
 var participantsUrl = '{{ path('app_api_participants', {'wod':wod.id, 'participant':participant_id})|raw }}';
 var readyUrl = '{{ path('app_api_ready', {'wod':wod.id}) }}';
 var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
+var audioAssets = '{{ asset('audio/') }}';
 </script>
 <script src="{{ asset('js/wodbuddy.clock.js') }}?v={{ random() }}"></script>
 {% endblock %}
