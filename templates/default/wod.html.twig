@@ -12,7 +12,7 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
 {% endblock %}
 
 {% block body %}
-<h1>Hello {{ participant ? participant.name : 'Guest' }}</h1>
+<h1>Hello {{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? app.user.name : 'Guest' }}</h1>
 
 <div class="mb-2">
     <a class="btn btn-sm btn-primary" href="{{ path('app_default_organization', {'id':organization.id}) }}">&#60; Go to {{ organization.name }}</a>

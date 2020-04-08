@@ -8,6 +8,13 @@
 - add chat
 - participants and chat has to be in overlay
 
+- make a little more inspiring frontpage
+- make sure create organization works
+- edit organization
+- only logged in users can create wods
+- only user created the wod can delete it
+- fix reset button
+
 - find wods from rss feed and add them as browsable options
 
 - convert to local timezone as well when the wod starts
