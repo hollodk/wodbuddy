@@ -42,7 +42,11 @@
 
                 {{ form_start(wod_form) }}
                 {{ form_row(wod_form.name) }}
-                {{ form_row(wod_form.stream) }}
+                <div class="form-group">
+                    {{ form_label(wod_form.stream) }}
+                    {{ form_widget(wod_form.stream) }}
+                    <small class="text-muted">If you have a live stream, or a conference members can join, enter the link here.</small>
+                </div>
                 {{ form_row(wod_form.startAt) }}
                 {{ form_row(wod_form.timer) }}
                 {{ form_row(wod_form.description) }}

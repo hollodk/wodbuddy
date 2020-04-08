@@ -76,6 +76,7 @@
 
                 {{ form_start(join_form) }}
                 {{ form_row(join_form.name) }}
+
                 <button class="btn btn-primary" type="submit">Search organization</button>
                 {{ form_end(join_form) }}
             </div>
@@ -89,8 +90,11 @@
                 <p>If you want to start your new workout program, sign up here, and you will get your own workout calendar for you and your friends or members.</p>
 
                 {{ form_start(organization_form) }}
+                {{ form_row(organization_form.organization) }}
                 {{ form_row(organization_form.name) }}
                 {{ form_row(organization_form.email) }}
+                {{ form_row(organization_form.password) }}
+
                 <button class="btn btn-primary" type="submit">Sign up</button>
                 {{ form_end(organization_form) }}
             </div>

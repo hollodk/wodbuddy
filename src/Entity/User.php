@@ -57,6 +57,11 @@ class User implements UserInterface
      */
     private $wods;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Organization", inversedBy="users")
+     */
+    private $organization;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -243,6 +248,18 @@ class User implements UserInterface
                 $wod->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getOrganization(): ?Organization
+    {
+        return $this->organization;
+    }
+
+    public function setOrganization(?Organization $organization): self
+    {
+        $this->organization = $organization;
 
         return $this;
     }

@@ -52,6 +52,18 @@
     </div>
 
     <div class="col-sm-6">
+        {% if app.user.organization %}
+        <div class="card">
+            <div class="card-header">
+                Organization
+            </div>
+            <div class="card-body">
+                <p>You are a part of {{ app.user.organization.name }}.</p>
+                <a href="{{ path('app_default_organization', {'id':app.user.organization.id}) }}" class="btn btn-primary">Go to {{ app.user.organization.name }}</a>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="card">
             <div class="card-header">
                 Participants

@@ -5,18 +5,25 @@ namespace App\Controller;
 use App\Entity\Organization;
 use App\Entity\Participant;
 use App\Entity\Track;
+use App\Entity\User;
 use App\Entity\Wod;
 use App\Form\WodType;
+use App\Security\AppCustomAuthenticator;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class DefaultController extends AbstractController
 {
     /**
      * @Route("", name="homepage")
      */
-    public function index(Request $request)
+    public function index(Request $request, UserPasswordEncoderInterface $passwordEncoder, GuardAuthenticatorHandler $guardHandler, AppCustomAuthenticator $authenticator)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -27,14 +34,43 @@ class DefaultController extends AbstractController
 
         $organizationForm = $this->get('form.factory')
             ->createNamedBuilder('organization_form')
-            ->add('name')
-            ->add('email')
+            ->add('organization', null, [
+                'attr' => [
+                    'placeholder' => 'My Gym',
+                ],
+            ])
+            ->add('name', null, [
+                'attr' => [
+                    'placeholder' => 'Your Name',
+                ],
+            ])
+            ->add('email', null, [
+                'attr' => [
+                    'placeholder' => 'Your Email',
+                ],
+            ])
+            ->add('password', PasswordType::class, [
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please enter a password',
+                    ]),
+                    new Length([
+                        'min' => 6,
+                        'minMessage' => 'Your password should be at least {{ limit }} characters',
+                        'max' => 4096,
+                    ]),
+                ],
+            ])
             ->getForm()
             ;
 
         $joinForm = $this->get('form.factory')
             ->createNamedBuilder('join_form')
-            ->add('name')
+            ->add('name', null, [
+                'attr' => [
+                    'placeholder' => 'Name of organization',
+                ],
+            ])
             ->getForm()
             ;
 
@@ -82,18 +118,33 @@ class DefaultController extends AbstractController
         if ($organizationForm->isSubmitted() && $organizationForm->isValid()) {
             $data = $organizationForm->getData();
 
-            $organization = $em->getRepository('App:Organization')->findOneByName($data['name']);
-
-            if ($organization) {
-                die('organization with this name already exists, try again');
-            }
-
             $organization = new Organization();
-            $organization->setName($data['name']);
+            $organization->setName($data['organization']);
             $organization->setHash(uniqid());
 
             $em->persist($organization);
+
+            $user = new User();
+            $user->setOrganization($organization);
+            $user->setEmail($data['email']);
+            $user->setName($data['name']);
+
+            $user->setPassword(
+                $passwordEncoder->encodePassword(
+                    $user,
+                    $data['password']
+                )
+            );
+
+            $em->persist($user);
             $em->flush();
+
+            $guardHandler->authenticateUserAndHandleSuccess(
+                $user,
+                $request,
+                $authenticator,
+                'main'
+            );
 
             return $this->redirectToRoute('app_default_organization', [
                 'id' => $organization->getId(),
@@ -128,6 +179,8 @@ class DefaultController extends AbstractController
     public function organization(Request $request, Organization $organization)
     {
         $em = $this->getDoctrine()->getManager();
+
+        $request->getSession()->set('organization', $organization->getId());
 
         $wods = $em->getRepository('App:Wod')->findBy(
             ['organization' => $organization],
@@ -187,9 +240,10 @@ class DefaultController extends AbstractController
      */
     public function wod(Request $request, Wod $wod)
     {
-        $wod->getConfig('timer');
         $em = $this->getDoctrine()->getManager();
         $session = $request->getSession();
+
+        $session->set('organization', $wod->getOrganization()->getId());
 
         $key = sprintf('wod_%d_participant', $wod->getId());
 
