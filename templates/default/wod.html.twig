@@ -19,7 +19,9 @@ var audioAssets = '{{ asset('audio/') }}';
 <h1>Hello {{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? app.user.name : 'Guest' }}</h1>
 
 <div class="mb-2">
+    {% if organization %}
     <a class="btn btn-sm btn-primary" href="{{ path('app_default_organization', {'id':organization.id}) }}">&#60; Go to {{ organization.name }}</a>
+    {% endif %}
     <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#configModal">Configure timer</span>
     <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#wodModal">Configure wod</span>
 </div>
@@ -114,7 +116,9 @@ var audioAssets = '{{ asset('audio/') }}';
                 Online users
             </div>
             <div class="card-body">
+                {% if organization %}
                 Online users in <a href="{{ path('app_default_organization', {'id':organization.id}) }}">{{ wod.organization.name }}</a>
+                {% endif %}
                 {% if wod.stream %}
                 <br><a href="{{ wod.stream }}">Join video conference</a>
                 {% endif %}

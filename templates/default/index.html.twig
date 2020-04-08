@@ -3,30 +3,95 @@
 {% block title %}Hello DefaultController!{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-<h1>Hello Guest! ✅</h1>
-
 <div class="row">
-    <div class="col-sm-6">
-        <h3>Join Organization</h3>
-        {{ form_start(join_form) }}
-        {{ form_row(join_form.name) }}
-        <button type="submit">Sign in</button>
-        {{ form_end(join_form) }}
+    <div class="col-sm-8">
+        <div class="card mb-2">
+            <div class="card-header">
+                WODbuddy
+            </div>
+            <div class="card-body">
+                <h1>Hello and welcome to WODbuddy!</h1>
+
+                <p>Welcome to WODbuddy, this is a <b>syncronized workout clock</b>, so you can workout with your buddies on the <b>other side of the world</b>, with the same timers.</p>
+                <p>For instance, if you <b>have a gym or a box</b>, you can <b>schedule your workouts</b> for your member, and everbody can <b>join the workout</b> page.
+                <br>When <b>everybody is ready</b>, the administrator of the workout will <b>start the timer on all participants browser</b>, so you are running <b>totally syncronized</b>.
+                <br>All timers are configured in the workout you join, no matter if you want to do any of the following.
+                </p>
+
+                <ul>
+                    <li>EMOM</li>
+                    <li>Tabata</li>
+                    <li>Running clock</li>
+                    <li>Countdown timer</li>
+                </ul>
+
+                <h3>Play with WODbuddy</h3>
+                <p>If you dont want to register an account, or would like give it a try, you can make a workout here.
+                <br><span class="btn btn-primary" data-toggle="modal" data-target="#wodModal">Create Workout</span>
+
+            </div>
+        </div>
     </div>
 
-    <div class="col-sm-6">
-        <h3>Create Organization</h3>
+    <div class="col-sm-4">
+        <div class="card mb-2">
+            <div class="card-header">
+                <h3>Join Organization</h3>
+            </div>
+            <div class="card-body">
+                <p>If you know the name of your organization, click here, and we will send you to the organization.</p>
 
-        {{ form_start(organization_form) }}
-        {{ form_row(organization_form.name) }}
-        {{ form_row(organization_form.email) }}
-        <button type="submit">Sign up</button>
-        {{ form_end(organization_form) }}
+                {{ form_start(join_form) }}
+                {{ form_row(join_form.name) }}
+                <button class="btn btn-primary" type="submit">Search organization</button>
+                {{ form_end(join_form) }}
+            </div>
+        </div>
+
+        <div class="card mb-2">
+            <div class="card-header">
+                <h3>Create Organization</h3>
+            </div>
+            <div class="card-body">
+                <p>If you want to start your new workout program, sign up here, and you will get your own workout calendar for you and your friends or members.</p>
+
+                {{ form_start(organization_form) }}
+                {{ form_row(organization_form.name) }}
+                {{ form_row(organization_form.email) }}
+                <button class="btn btn-primary" type="submit">Sign up</button>
+                {{ form_end(organization_form) }}
+            </div>
+        </div>
     </div>
 </div>
+
+{{ form_start(wod_form) }}
+<div class="modal fade" id="wodModal" tabindex="-1" role="dialog" aria-labelledby="wodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="wodModalLabel">Configure workout</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Create Workout</h3>
+
+                        {{ form_start(wod_form) }}
+                        {{ form_row(wod_form.name) }}
+                        {{ form_row(wod_form.timer) }}
+                        {{ form_row(wod_form.description) }}
+                        <button class="btn btn-primary" type="submit">Create</button>
+                        {{ form_end(wod_form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ form_end(wod_form) }}
+
 {% endblock %}

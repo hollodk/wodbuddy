@@ -1,7 +1,7 @@
-- make a little more inspiring frontpage
 - make sure create organization works
+
 - edit organization
-- only logged in users can create wods
+- only logged in users can create wods for organization
 - only user created the wod can delete it
 
 - add chat
@@ -14,8 +14,6 @@
 - add tracking need a workout_at to the form
 
 - find a way that people does not click the timer themselves
-
-- have the wod clock standalone
 
 - add a wod logbook
 

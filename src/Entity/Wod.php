@@ -45,7 +45,7 @@ class Wod
     private $organization;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $startAt;
 
@@ -167,7 +167,7 @@ class Wod
         return $this->startAt;
     }
 
-    public function setStartAt(\DateTimeInterface $startAt): self
+    public function setStartAt(?\DateTimeInterface $startAt): self
     {
         $this->startAt = $startAt;
 

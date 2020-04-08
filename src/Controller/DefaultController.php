@@ -33,6 +33,42 @@ class DefaultController extends AbstractController
             ->getForm()
             ;
 
+        $wod = new Wod();
+        $wod->setName('My WOD');
+
+        $wodForm = $this->createForm(WodType::class, $wod);
+        $wodForm->remove('startAt');
+        $wodForm->remove('stream');
+
+        $wodForm->handleRequest($request);
+
+        if ($wodForm->isSubmitted() && $wodForm->isValid()) {
+            $attr = [
+                'delay' => 5,
+                'type' => $wod->getTimer(),
+            ];
+
+            switch ($wod->getTimer()) {
+            case 'timer':
+                $attr['time'] = '10:00';
+                break;
+
+            case 'emom':
+                $attr['emomtime'] = '01:00';
+                $attr['round'] = 12;
+                break;
+            }
+
+            $wod->setAttribute(json_encode($attr));
+
+            $em->persist($wod);
+            $em->flush();
+
+            return $this->redirectToRoute('app_default_wod', [
+                'id' => $wod->getId(),
+            ]);
+        }
+
         $organizationForm->handleRequest($request);
         $joinForm->handleRequest($request);
 
@@ -74,6 +110,7 @@ class DefaultController extends AbstractController
         return $this->render('default/index.html.twig', [
             'join_form' => $joinForm->createView(),
             'organization_form' => $organizationForm->createView(),
+            'wod_form' => $wodForm->createView(),
         ]);
     }
 
@@ -136,25 +173,6 @@ class DefaultController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/wod-delete")
-     */
-    public function woddelete(Request $request, Wod $wod)
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        foreach ($wod->getParticipants() as $p) {
-            $em->remove($p);
-        }
-
-        $em->remove($wod);
-        $em->flush();
-
-        return $this->redirectToRoute('app_default_organization', [
-            'id' => $wod->getOrganization()->getId(),
-        ]);
-    }
-
-    /**
      * @Route("/{id}/wod")
      */
     public function wod(Request $request, Wod $wod)
@@ -182,6 +200,10 @@ class DefaultController extends AbstractController
 
         $wodForm = $this->createForm(WodType::class, $wod);
         $wodForm->remove('timer');
+
+        if (!$wod->getOrganization()) {
+            $wodForm->remove('startAt');
+        }
 
         $data = [];
         if ($this->getUser()) {
@@ -238,6 +260,25 @@ class DefaultController extends AbstractController
             'participant' => $participant,
             'participant_id' => $participantId,
             'tracks' => $tracks,
+        ]);
+    }
+
+    /**
+     * @Route("/{id}/wod-delete")
+     */
+    public function woddelete(Request $request, Wod $wod)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        foreach ($wod->getParticipants() as $p) {
+            $em->remove($p);
+        }
+
+        $em->remove($wod);
+        $em->flush();
+
+        return $this->redirectToRoute('app_default_organization', [
+            'id' => $wod->getOrganization()->getId(),
         ]);
     }
 
@@ -328,6 +369,11 @@ class DefaultController extends AbstractController
     {
         $form = $this->createForm(WodType::class, $wod);
         $form->remove('timer');
+
+        if (!$wod->getOrganization()) {
+            $form->remove('startAt');
+        }
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
