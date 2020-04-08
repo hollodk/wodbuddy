@@ -72,6 +72,11 @@ class Track
      */
     private $rxOrScaled;
 
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $workoutAt;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -258,5 +263,17 @@ class Track
         }
 
         return $text;
+    }
+
+    public function getWorkoutAt(): ?\DateTimeInterface
+    {
+        return $this->workoutAt;
+    }
+
+    public function setWorkoutAt(\DateTimeInterface $workoutAt): self
+    {
+        $this->workoutAt = $workoutAt;
+
+        return $this;
     }
 }

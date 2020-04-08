@@ -181,6 +181,7 @@ class DefaultController extends AbstractController
         );
 
         $wodForm = $this->createForm(WodType::class, $wod);
+        $wodForm->remove('timer');
 
         $data = [];
         if ($this->getUser()) {
@@ -208,12 +209,14 @@ class DefaultController extends AbstractController
                 $participant = new Participant();
                 $participant->setUser($this->getUser());
                 $participant->setWod($wod);
-                $participant->setName($data['name']);
                 $participant->setLastSeenAt(new \DateTime());
 
                 $em->persist($participant);
-                $em->flush();
             }
+
+            $participant->setName($data['name']);
+
+            $em->flush();
 
             $request->getSession()->set($key, $participant->getId());
 
@@ -247,6 +250,7 @@ class DefaultController extends AbstractController
         $track->setWod($wod);
         $track->setUser($this->getUser());
         $track->setWodDescription($wod->getDescription());
+        $track->setWorkoutAt(new \DateTime());
 
         if ($request->get('wod-rating')) {
             $track->setWodRating($request->get('wod-rating'));
@@ -323,6 +327,7 @@ class DefaultController extends AbstractController
     public function edit(Request $request, Wod $wod)
     {
         $form = $this->createForm(WodType::class, $wod);
+        $form->remove('timer');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

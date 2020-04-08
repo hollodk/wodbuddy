@@ -4,9 +4,12 @@
 
 {% block javascripts %}
 <script>
-var participantsUrl = '{{ path('app_api_participants', {'wod':wod.id, 'participant':participant_id})|raw }}';
+var participantsUrl = '{{ path('app_api_participants') }}';
 var readyUrl = '{{ path('app_api_ready', {'wod':wod.id}) }}';
 var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
+wbConfig.wodId = '{{ wod.id }}';
+wbConfig.participantId = '{{ participant_id }}';
+
 var audioAssets = '{{ asset('audio/') }}';
 </script>
 <script src="{{ asset('js/wodbuddy.clock.js') }}?v={{ random() }}"></script>
@@ -94,6 +97,10 @@ var audioAssets = '{{ asset('audio/') }}';
             <div class="card-body">
                 <p>If you want to join a workout with friends, enter you name here, to let other know you are ready.</p>
 
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') == false %}
+                <p>Remember that you can <a href="{{ path('app_register') }}">create a free profile</a> and track your progress.</p>
+                {% endif %}
+
                 {{ form_start(form) }}
                 {{ form_row(form.name) }}
                 <button class="btn btn-primary" type="submit">Join</button>
@@ -104,33 +111,14 @@ var audioAssets = '{{ asset('audio/') }}';
 
         <div class="card mb-2">
             <div class="card-header">
-                Organization
-            </div>
-            <div class="card-body">
-                <table class="table table-striped">
-                    <tr>
-                        <th>Organization</th>
-                        <td class="text-right"><a href="{{ path('app_default_organization', {'id':organization.id}) }}">{{ wod.organization.name }}</a></td>
-                    </tr>
-                    {% if wod.stream %}
-                    <tr>
-                        <th>Stream Link</th>
-                        <td class="text-right"><a href="{{ wod.stream }}">link</a></td>
-                    </tr>
-                    {% endif %}
-                </table>
-            </div>
-        </div>
-
-        <div class="card mb-2">
-            <div class="card-header">
                 Online users
             </div>
-            {% if is_granted('IS_AUTHENTICATED_REMEMBERED') == false %}
             <div class="card-body">
-                <p>Remember that you can <a href="{{ path('app_register') }}">create a free profile</a> and track your progress.</p>
+                Online users in <a href="{{ path('app_default_organization', {'id':organization.id}) }}">{{ wod.organization.name }}</a>
+                {% if wod.stream %}
+                <br><a href="{{ wod.stream }}">Join video conference</a>
+                {% endif %}
             </div>
-            {% endif %}
             <div class="table-responsive">
                 <table class="table table-striped" id="participant-box">
                 </table>
@@ -162,18 +150,6 @@ var audioAssets = '{{ asset('audio/') }}';
                 </table>
             </div>
         </div>
-
-        {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-        <div class="card mb-2">
-            <div class="card-header">
-                Delete WOD
-            </div>
-            <div class="card-body">
-                <p>If you want to delete this workout, click on the button below</p>
-                <a onclick="return confirm('Are you sure?')" class="btn btn-danger" href="{{ path('app_default_woddelete', {'id':wod.id}) }}">Delete WOD</a>
-            </div>
-        </div>
-        {% endif %}
     </div>
 </div>
 
@@ -412,17 +388,36 @@ var audioAssets = '{{ asset('audio/') }}';
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="wodModalLabel">Configure timer</h5>
+                <h5 class="modal-title" id="wodModalLabel">Configure workout</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                {{ form_row(wod_form) }}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Save changes</button>
+                <div class="card mb-2">
+                    <div class="card-header">
+                        Configure WOD
+                    </div>
+                    <div class="card-body">
+                        {{ form_widget(wod_form) }}
+                    </div>
+                    <div class="card-footer text-right">
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                <div class="card mb-2">
+                    <div class="card-header">
+                        Delete WOD
+                    </div>
+                    <div class="card-body">
+                        <p>If you want to delete this workout, click on the button below</p>
+                        <a onclick="return confirm('Are you sure?')" class="btn btn-danger" href="{{ path('app_default_woddelete', {'id':wod.id}) }}">Delete WOD</a>
+                    </div>
+                </div>
+                {% endif %}
+
             </div>
         </div>
     </div>

@@ -24,7 +24,7 @@ class ProfileController extends AbstractController
 
         $tracks = $em->getRepository('App:Track')->findBy(
             ['user' => $this->getUser()],
-            ['id' => 'DESC'],
+            ['workoutAt' => 'DESC'],
             20
         );
 

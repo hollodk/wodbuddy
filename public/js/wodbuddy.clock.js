@@ -1,5 +1,7 @@
 var startDelay = wbConfig.delay;
 
+var isStarted = false;
+
 // total timer
 var totalTimer = 0;
 
@@ -114,7 +116,11 @@ function startMonitor()
 
 function initStart()
 {
+    if (isStarted == true) return;
+
     monitorStarted = true;
+    isStarted = true;
+
     $('#wodbuddy-begin').hide();
     $('#start-wod-btn').hide();
 
@@ -259,7 +265,16 @@ function updateScore()
 
 function updateParticipants()
 {
-    $.get(participantsUrl, function(data) {
+    $.ajax({
+        url: participantsUrl,
+        type: 'get',
+        data: {
+            participant: wbConfig.participantId,
+            wod: wbConfig.wodId,
+            isStarted: isStarted,
+        }
+    })
+    .done(function(data) {
         $('#participant-box').html('');
 
         if (data.participants.length > 1) {
@@ -272,13 +287,19 @@ function updateParticipants()
         }
 
         $.each(data.participants, function(key, value) {
+            var started = '';
+            if (value.is_started) {
+                started = ' <i class="fas fa-history"></i>';
+            }
+
             if (value.is_me) {
-                $('#participant-box').append('<tr><td><b>&#62; '+value.name+'</b></td><td class="text-right">'+value.time_ago+'</td></tr>');
+                $('#participant-box').append('<tr><td><b>&#62; '+value.name+started+'</b></td><td class="text-right">'+value.time_ago+'</td></tr>');
             } else {
-                $('#participant-box').append('<tr><td>'+value.name+'</td><td class="text-right">'+value.time_ago+'</td></tr>');
+                $('#participant-box').append('<tr><td>'+value.name+started+'</td><td class="text-right">'+value.time_ago+'</td></tr>');
             }
         });
-    });
+    })
+    ;
 }
 
 function startClock()

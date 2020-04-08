@@ -19,11 +19,24 @@ class ApiController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
+        $memcached = new \Memcached();
+        $memcached->addServer('localhost', '11211');
+
+        $startedKey = 'wod_%d_partifipant_%d_started';
+
         if ($request->get('participant')) {
             $participant = $em->find('App:Participant', $request->get('participant'));
             $participant->setLastSeenAt(new \DateTime());
 
             $em->flush();
+
+            if ($request->get('isStarted') == 'true') {
+                $key = sprintf($startedKey,
+                    $request->get('wod'),
+                    $request->get('participant')
+                );
+                $memcached->set($key, $request->get('isStarted'), 30);
+            }
         }
 
         $wod = $em->find('App:Wod', $request->get('wod'));
@@ -53,6 +66,7 @@ class ApiController extends AbstractController
                 'name' => $p->getName(),
                 'time_ago' => $this->timeAgo($p->getLastSeenAt()),
                 'is_me' => false,
+                'is_started' => $memcached->get(sprintf($startedKey, $wod->getId(), $p->getId())),
             ];
 
             if ($user && $user->getId() == $p->getId()) {

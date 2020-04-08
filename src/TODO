@@ -1,18 +1,29 @@
+- make a little more inspiring frontpage
+- make sure create organization works
+- edit organization
+- only logged in users can create wods
+- only user created the wod can delete it
+
+- add chat
+- participants and chat has to be in overlay
+
 - make it visible that people need to get an invitation link from an organization, or they can start a new organization
+
+- integrate shutterstock music in some way?
+
+- add tracking need a workout_at to the form
+
+- find a way that people does not click the timer themselves
+
+- have the wod clock standalone
+
+- add a wod logbook
 
 - if an user add a score, which is better than a previous, is_enabled should be false
 
 - add daily best times
 - add monthly best times
 
-- add chat
-- participants and chat has to be in overlay
-
-- make a little more inspiring frontpage
-- make sure create organization works
-- edit organization
-- only logged in users can create wods
-- only user created the wod can delete it
 - fix reset button
 
 - find wods from rss feed and add them as browsable options
