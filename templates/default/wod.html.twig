@@ -45,7 +45,11 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
                 {% endif %}
                 <hr>
 
+                {% if is_granted('IS_AUTHORIZED_REMEMBERED') %}
                 <span class="btn btn-primary" data-toggle="modal" data-target="#trackModal">Register you workout</span>
+                {% else %}
+                <p>Login or <a href="{{ path('app_register') }}">create a free profile</a> to track your score.</p>
+                {% endif %}
             </div>
             {% if wod.name %}
             <div class="card-footer">
@@ -285,6 +289,7 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
                         <option value="calories">Calories</option>
                         <option value="points">Points</option>
                         <option value="meters">Meters</option>
+                        <option value="">Do not enter my score</option>
                     </select>
                 </div>
 

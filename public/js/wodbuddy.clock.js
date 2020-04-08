@@ -184,6 +184,16 @@ function updateScore()
     var value = $('#modal-score-type option:checked').val();
 
     switch (value) {
+        case '':
+            $('#modal-score-time').hide();
+            $('#modal-score-reps').hide();
+            $('#modal-score-load').hide();
+            $('#modal-score-calories').hide();
+            $('#modal-score-points').hide();
+            $('#modal-score-meters').hide();
+
+            break;
+
         case 'time':
             $('#modal-score-time').show();
             $('#modal-score-reps').hide();

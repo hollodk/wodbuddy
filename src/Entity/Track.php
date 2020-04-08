@@ -229,6 +229,9 @@ class Track
     public function getScoreText()
     {
         switch ($this->getType()) {
+        case '':
+            $text = null;
+            break;
         case 'time':
             $text = gmdate('H:i:s', $this->getScore());
             break;
