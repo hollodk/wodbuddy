@@ -116,6 +116,7 @@ function initStart()
 {
     monitorStarted = true;
     $('#wodbuddy-begin').hide();
+    $('#start-wod-btn').hide();
 
     $('#wodbuddy-clock').html('<span class="h1">Starting in '+startDelay+' seconds</span>');
 
@@ -262,7 +263,9 @@ function updateParticipants()
         $('#participant-box').html('');
 
         if (data.participants.length > 1) {
-            $('#start-wod-btn').show();
+            if (monitorStarted == false) {
+                $('#start-wod-btn').show();
+            }
             startMonitor();
         } else {
             $('#start-wod-btn').hide();
@@ -289,7 +292,7 @@ function startClock()
                 clockCounter++;
                 defaultStart();
 
-                if ((clockCounter%60) == 0) play('go');
+                if ((clockCounter%60) == 0) play('ding');
                 $('#wodbuddy-finish').show();
 
             }, 1000);
@@ -450,6 +453,8 @@ function loadAudio()
     var audio = new Audio('http://wodbuddy.fly-mailers.space/audio/go.mp3');
     audio.load();
     audio = new Audio('http://wodbuddy.fly-mailers.space/audio/gw.mp3');
+    audio.load();
+    audio = new Audio('http://wodbuddy.fly-mailers.space/audio/ding.mp3');
     audio.load();
     audio = new Audio('http://wodbuddy.fly-mailers.space/audio/break.mp3');
     audio.load();
