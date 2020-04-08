@@ -4,14 +4,8 @@
 
 {% block javascripts %}
 <script>
-{% if participant %}
-var pingUrl = '{{ path('app_api_ping', {'id':participant.id}) }}';
-{% else %}
-var pingUrl = '';
-{% endif %}
-
-var participantsUrl = '{{ path('app_api_participants', {'id':wod.id}) }}';
-var readyUrl = '{{ path('app_api_ready', {'id':wod.id}) }}';
+var participantsUrl = '{{ path('app_api_participants', {'wod':wod.id, 'participant':participant_id})|raw }}';
+var readyUrl = '{{ path('app_api_ready', {'wod':wod.id}) }}';
 var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
 </script>
 <script src="{{ asset('js/wodbuddy.clock.js') }}?v={{ random() }}"></script>
@@ -21,7 +15,7 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
 <h1>Hello {{ participant ? participant.name : 'Guest' }}</h1>
 
 <div class="mb-2">
-    <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#exampleModal">Configure timer</span>
+    <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#configModal">Configure timer</span>
     <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#wodModal">Configure wod</span>
 </div>
 
@@ -49,6 +43,9 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
                 <b>EMOM</b>, every <b>{{ wod.config('emomtime') }}</b> minute for <b>{{ wod.config('round') }}</b> rounds.
                 {% if wod.config('repeat') > 1 %}<br>Repeat <b>{{ wod.config('repeat') }}</b> times, with <b>{{ wod.config('break') }}</b> minutes break.{% endif %}
                 {% endif %}
+                <hr>
+
+                <span class="btn btn-primary" data-toggle="modal" data-target="#trackModal">Register you workout</span>
             </div>
             {% if wod.name %}
             <div class="card-footer">
@@ -66,7 +63,9 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
                     <span class="btn btn-primary" id="wodbuddy-begin">Start workout</span>
                 </div>
 
-                <span class="h1" id="wodbuddy-clock">Waiting to start</span>
+                <div id="wodbuddy-clock">
+                    <span class="h1">Waiting to start</span>
+                </div>
                 <hr>
                 <span class="btn btn-block btn-lg btn-primary" id="wodbuddy-finish">FINISH</span>
             </div>
@@ -80,6 +79,22 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
     </div>
 
     <div class="col-sm-6">
+        {% if participant == null %}
+        <div class="card mb-2">
+            <div class="card-header">
+                Join Workout
+            </div>
+            <div class="card-body">
+                <p>If you want to join a workout with friends, enter you name here, to let other know you are ready.</p>
+
+                {{ form_start(form) }}
+                {{ form_row(form.name) }}
+                <button class="btn btn-primary" type="submit">Join</button>
+                {{ form_end(form) }}
+            </div>
+        </div>
+        {% endif %}
+
         <div class="card mb-2">
             <div class="card-header">
                 Organization
@@ -101,20 +116,6 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
                  <a id="start-wod-btn" onclick="return confirm('Are you sure?')" class="btn btn-primary" href="{{ path('app_default_start', {'id':wod.id}) }}">Start WOD for all</a>
             </div>
         </div>
-
-        {% if participant == null %}
-        <div class="card mb-2">
-            <div class="card-header">
-                Join Workout
-            </div>
-            <div class="card-body">
-                {{ form_start(form) }}
-                {{ form_row(form.name) }}
-                <button class="btn btn-primary" type="submit">Join</button>
-                {{ form_end(form) }}
-            </div>
-        </div>
-        {% endif %}
 
         <div class="card mb-2">
             <div class="card-header">
@@ -146,17 +147,17 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
 </div>
 
 <form action="{{ path('app_default_timer', {'id':wod.id}) }}" method="post">
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="configModal" tabindex="-1" role="dialog" aria-labelledby="configModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Configure timer</h5>
+                <h5 class="modal-title" id="configModalLabel">Configure timer</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-group" id="modal-type">
+                <div class="form-group">
                     <label>Type:</label>
                     <select name="type" id="modal-form-type" class="form-control">
                         <option {% if wod.timer == 'clock' %}selected{% endif %} value="clock">Clock</option>
@@ -255,6 +256,116 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
                     <small class="text-muted">How much time between break.</small>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+
+<form action="{{ path('app_default_track', {'id':wod.id}) }}" method="post">
+<div class="modal fade" id="trackModal" tabindex="-1" role="dialog" aria-labelledby="trackModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="trackModalLabel">Register my workout</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Scoring:</label>
+                    <select name="type" id="modal-score-type" class="form-control" id="score-type">
+                        <option value="time">Time</option>
+                        <option value="reps">Reps</option>
+                        <option value="load">Load</option>
+                        <option value="calories">Calories</option>
+                        <option value="points">Points</option>
+                        <option value="meters">Meters</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="modal-score-time">
+                    <label>Time:</label>
+                    <div class="row">
+                        <div class="col-6">
+                            <input type="text" class="form-control" name="time-min" placeholder="Minutes">
+                        </div>
+                        <div class="col-6">
+                            <input type="text" class="form-control" name="time-sec" placeholder="Seconds">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" id="modal-score-reps">
+                    <label>Reps:</label>
+                    <input type="text" class="form-control" name="reps">
+                </div>
+
+                <div class="form-group" id="modal-score-load">
+                    <label>Kilo:</label>
+                    <input type="text" class="form-control" name="load">
+                </div>
+
+                <div class="form-group" id="modal-score-calories">
+                    <label>Calories:</label>
+                    <input type="text" class="form-control" name="calories">
+                </div>
+
+                <div class="form-group" id="modal-score-points">
+                    <label>Points:</label>
+                    <input type="text" class="form-control" name="points">
+                </div>
+
+                <div class="form-group" id="modal-score-meters">
+                    <label>Meters:</label>
+                    <input type="text" class="form-control" name="meters">
+                </div>
+
+                <div class="form-group">
+                    <label>Rx or scaled:</label>
+                    <select name="rx-scaled" class="form-control">
+                        <option value="rx">RX</option>
+                        <option value="scaled">Scaled</option>
+                    </select>
+                    <small class="text-muted">Did you complete the workout RX or scaled.</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Note:</label>
+                    <textarea class="form-control" rows="7" name="note"></textarea>
+                    <small class="text-muted">Write a note for your personal records.</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Rate the workout:</label>
+                    <select name="wod-rating" class="form-control">
+                        <option value="">Click here to rate</option>
+                        <option value="5">5 - excellent</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1 - bad</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>How do you feel:</label>
+                    <select name="feeling" class="form-control">
+                        <option value="">Click here to rate</option>
+                        <option value="5">5 - excellent</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1 - bad</option>
+                    </select>
+                    <small class="text-muted">For your own records, to track your progress.</small>
+                </div>
+            </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="submit" class="btn btn-primary">Save changes</button>

@@ -69,9 +69,15 @@ class Wod
      */
     private $stream;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Track", mappedBy="wod")
+     */
+    private $tracks;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
+        $this->tracks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -240,6 +246,37 @@ class Wod
     public function setStream(?string $stream): self
     {
         $this->stream = $stream;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Track[]
+     */
+    public function getTracks(): Collection
+    {
+        return $this->tracks;
+    }
+
+    public function addTrack(Track $track): self
+    {
+        if (!$this->tracks->contains($track)) {
+            $this->tracks[] = $track;
+            $track->setWod($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTrack(Track $track): self
+    {
+        if ($this->tracks->contains($track)) {
+            $this->tracks->removeElement($track);
+            // set the owning side to null (unless already changed)
+            if ($track->getWod() === $this) {
+                $track->setWod(null);
+            }
+        }
 
         return $this;
     }

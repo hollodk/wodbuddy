@@ -42,9 +42,15 @@ class User implements UserInterface
      */
     private $participants;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Track", mappedBy="user")
+     */
+    private $tracks;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
+        $this->tracks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -150,6 +156,37 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($participant->getUser() === $this) {
                 $participant->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Track[]
+     */
+    public function getTracks(): Collection
+    {
+        return $this->tracks;
+    }
+
+    public function addTrack(Track $track): self
+    {
+        if (!$this->tracks->contains($track)) {
+            $this->tracks[] = $track;
+            $track->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTrack(Track $track): self
+    {
+        if ($this->tracks->contains($track)) {
+            $this->tracks->removeElement($track);
+            // set the owning side to null (unless already changed)
+            if ($track->getUser() === $this) {
+                $track->setUser(null);
             }
         }
 

@@ -19,7 +19,14 @@ class ApiController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $wod = $em->find('App:Wod', $request->get('id'));
+        if ($request->get('participant')) {
+            $participant = $em->find('App:Participant', $request->get('participant'));
+            $participant->setLastSeenAt(new \DateTime());
+
+            $em->flush();
+        }
+
+        $wod = $em->find('App:Wod', $request->get('wod'));
         $from = new \DateTime();
         $from->modify('-15 minutes');
 
@@ -68,27 +75,10 @@ class ApiController extends AbstractController
         $memcached = new \Memcached();
         $memcached->addServer('localhost', '11211');
 
-        $status = $memcached->get('wod_status_'.$request->get('id'));
+        $status = $memcached->get('wod_status_'.$request->get('wod'));
 
         return new JsonResponse([
             'start' => $status,
-        ]);
-    }
-
-    /**
-     * @Route("/ping")
-     */
-    public function ping(Request $request)
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $participant = $em->find('App:Participant', $request->get('id'));
-        $participant->setLastSeenAt(new \DateTime());
-
-        $em->flush();
-
-        return new JsonResponse([
-            'status' => 'ok',
         ]);
     }
 

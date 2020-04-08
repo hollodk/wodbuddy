@@ -1,5 +1,8 @@
 var startDelay = wbConfig.delay;
 
+// total timer
+var totalTimer = 0;
+
 // repeat counter
 var repeatCounter = 0;
 
@@ -25,7 +28,16 @@ var timerInterval = null;
 var readyInterval = null;
 var monitorStarted = false;
 
-loadaudio();
+loadAudio();
+
+// modal-score-form
+$(document).ready(function() {
+    updateScore();
+});
+
+$('#modal-score-type').on('change', function() {
+    updateScore();
+});
 
 // modal-form
 $(document).ready(function() {
@@ -48,12 +60,6 @@ $(document).ready(function() {
     setInterval(function() {
         updateParticipants();
     }, 5000);
-
-    if (pingUrl) {
-        setInterval(function() {
-            $.get(pingUrl);
-        }, 15000);
-    }
 });
 
 // wodbuddy stuff
@@ -111,11 +117,11 @@ function initStart()
     monitorStarted = true;
     $('#wodbuddy-begin').hide();
 
-    $('#wodbuddy-clock').html('Starting in '+startDelay+' seconds');
+    $('#wodbuddy-clock').html('<span class="h1">Starting in '+startDelay+' seconds</span>');
 
     var x = setInterval(function() {
         startDelay--;
-        $('#wodbuddy-clock').html('Starting in '+startDelay+' seconds');
+        $('#wodbuddy-clock').html('<span class="h1">Starting in '+startDelay+' seconds</span>');
 
         if (startDelay <= 3) {
             play(startDelay);
@@ -173,6 +179,73 @@ function updateModal()
     }
 }
 
+function updateScore()
+{
+    var value = $('#modal-score-type option:checked').val();
+
+    switch (value) {
+        case 'time':
+            $('#modal-score-time').show();
+            $('#modal-score-reps').hide();
+            $('#modal-score-load').hide();
+            $('#modal-score-calories').hide();
+            $('#modal-score-points').hide();
+            $('#modal-score-meters').hide();
+
+            break;
+
+        case 'reps':
+            $('#modal-score-time').hide();
+            $('#modal-score-reps').show();
+            $('#modal-score-load').hide();
+            $('#modal-score-calories').hide();
+            $('#modal-score-points').hide();
+            $('#modal-score-meters').hide();
+
+            break;
+
+        case 'load':
+            $('#modal-score-time').hide();
+            $('#modal-score-reps').hide();
+            $('#modal-score-load').show();
+            $('#modal-score-calories').hide();
+            $('#modal-score-points').hide();
+            $('#modal-score-meters').hide();
+
+            break;
+
+        case 'calories':
+            $('#modal-score-time').hide();
+            $('#modal-score-reps').hide();
+            $('#modal-score-load').hide();
+            $('#modal-score-calories').show();
+            $('#modal-score-points').hide();
+            $('#modal-score-meters').hide();
+
+            break;
+
+        case 'points':
+            $('#modal-score-time').hide();
+            $('#modal-score-reps').hide();
+            $('#modal-score-load').hide();
+            $('#modal-score-calories').hide();
+            $('#modal-score-points').show();
+            $('#modal-score-meters').hide();
+
+            break;
+
+        case 'meters':
+            $('#modal-score-time').hide();
+            $('#modal-score-reps').hide();
+            $('#modal-score-load').hide();
+            $('#modal-score-calories').hide();
+            $('#modal-score-points').hide();
+            $('#modal-score-meters').show();
+
+            break;
+    }
+}
+
 function updateParticipants()
 {
     $.get(participantsUrl, function(data) {
@@ -202,6 +275,7 @@ function startClock()
     switch (wbConfig.type) {
         case 'clock':
             timerInterval = setInterval(function() {
+                totalTimer++;
                 clockCounter++;
                 defaultStart();
 
@@ -214,6 +288,7 @@ function startClock()
 
         case 'timer':
             timerInterval = setInterval(function() {
+                totalTimer++;
                 countDown--;
                 defaultStart();
 
@@ -240,6 +315,8 @@ function startClock()
 
         case 'emom':
             timerInterval = setInterval(function() {
+                totalTimer++;
+
                 if (emomRound == 0) {
                     emomCountDown = emomSeconds;
                     emomRound = 1;
@@ -277,6 +354,7 @@ function startClock()
 
         case 'tabata':
             timerInterval = setInterval(function() {
+                totalTimer++;
 
                 if (tabataRound == 0) {
                     tabataCountDown = tabataInterval;
@@ -330,14 +408,20 @@ function startPause(seconds)
     start = seconds;
 
     var x = setInterval(function() {
+        totalTimer++;
         start--;
+
+        var total = moment()
+            .startOf('day')
+            .seconds(totalTimer)
+            .format('HH:mm:ss');
 
         var text = moment()
             .startOf('day')
             .seconds(start)
             .format('HH:mm:ss');
 
-        $('#wodbuddy-clock').html('Pause<br>'+text);
+        $('#wodbuddy-clock').html('<span class="h1">Pause<br>'+text+'</span><br><span>Total time: '+total+'</span>');
 
         if (start <= 3) {
             play(start);
@@ -351,7 +435,7 @@ function startPause(seconds)
     }, 1000);
 }
 
-function loadaudio()
+function loadAudio()
 {
     var audio = new Audio('http://wodbuddy.fly-mailers.space/audio/go.mp3');
     audio.load();
@@ -425,13 +509,18 @@ function displayClock()
             break;
     }
 
+    var total = moment()
+        .startOf('day')
+        .seconds(totalTimer)
+        .format('HH:mm:ss');
+
     var text = moment()
         .startOf('day')
         .seconds(seconds)
         .format('HH:mm:ss');
 
     if (header) {
-        text = header+text;
+        text = '<span class="h1">'+header+text+'</span><br><span>Total time: '+total+'</span>';
     }
 
     $('#wodbuddy-clock').html(text);

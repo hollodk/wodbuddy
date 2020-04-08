@@ -22,6 +22,12 @@ class ProfileController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
+        $tracks = $em->getRepository('App:Track')->findBy(
+            ['user' => $this->getUser()],
+            ['id' => 'DESC'],
+            20
+        );
+
         $participants = $em->getRepository('App:Participant')->findBy(
             ['user' => $this->getUser()],
             ['updatedAt' => 'DESC'],
@@ -30,6 +36,7 @@ class ProfileController extends AbstractController
 
         return $this->render('profile/index.html.twig', [
             'participants' => $participants,
+            'tracks' => $tracks,
         ]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Organization;
 use App\Entity\Participant;
+use App\Entity\Track;
 use App\Entity\Wod;
 use App\Form\WodType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -211,6 +212,8 @@ class DefaultController extends AbstractController
             ]);
         }
 
+        $participantId = ($participant) ? $participant->getId() : null;
+
         return $this->render('default/wod.html.twig', [
             'wod' => $wod,
             'attribute' => json_decode($wod->getAttribute()),
@@ -219,7 +222,69 @@ class DefaultController extends AbstractController
             'wod_form' => $wodForm->createView(),
             'participants' => $participants,
             'participant' => $participant,
+            'participant_id' => $participantId,
         ]);
+    }
+
+    /**
+     * @Route("/{id}/track")
+     */
+    public function track(Request $request, Wod $wod)
+    {
+        $track = new Track();
+        $track->setWod($wod);
+        $track->setUser($this->getUser());
+        $track->setWodDescription($wod->getDescription());
+
+        if ($request->get('wod-rating')) {
+            $track->setWodRating($request->get('wod-rating'));
+        }
+        if ($request->get('feeling')) {
+            $track->setFeeling($request->get('feeling'));
+        }
+        $track->setNote($request->get('note'));
+        $track->setType($request->get('type'));
+        $track->setRxOrScaled($request->get('rx-scaled'));
+
+        switch ($request->get('type')) {
+        case 'time':
+            $time = 0;
+            if ($request->get('time-min')) {
+                $time = $request->get('time-min')*60;
+            }
+            if ($request->get('time-sec')) {
+                $time += $request->get('time-sec');
+            }
+            $track->setScore($time);
+
+            break;
+
+        case 'reps':
+            $track->setScore($request->get('reps'));
+            break;
+
+        case 'load':
+            $track->setScore($request->get('load'));
+            break;
+
+        case 'calories':
+            $track->setScore($request->get('calories'));
+            break;
+
+        case 'points':
+            $track->setScore($request->get('points'));
+            break;
+
+        case 'meters':
+            $track->setScore($request->get('meters'));
+            break;
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($track);
+        $em->flush();
+
+        return $this->redirect($request->server->get('HTTP_REFERER'));
     }
 
     /**
