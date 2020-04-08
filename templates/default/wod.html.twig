@@ -15,6 +15,7 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
 <h1>Hello {{ participant ? participant.name : 'Guest' }}</h1>
 
 <div class="mb-2">
+    <a class="btn btn-sm btn-primary" href="{{ path('app_default_organization', {'id':organization.id}) }}">&#60; Go to {{ organization.name }}</a>
     <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#configModal">Configure timer</span>
     <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#wodModal">Configure wod</span>
 </div>
@@ -45,7 +46,7 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
                 {% endif %}
                 <hr>
 
-                {% if is_granted('IS_AUTHORIZED_REMEMBERED') %}
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
                 <span class="btn btn-primary" data-toggle="modal" data-target="#trackModal">Register you workout</span>
                 {% else %}
                 <p>Login or <a href="{{ path('app_register') }}">create a free profile</a> to track your score.</p>
@@ -65,7 +66,7 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
             <div class="card-body text-center">
                 <div class="mb-2">
                     <span class="btn btn-primary" id="wodbuddy-begin">Start workout</span>
-                    <a id="start-wod-btn" onclick="return confirm('Are you sure?')" class="btn btn-lg btn-primary" href="{{ path('app_default_start', {'id':wod.id}) }}">Start WOD for all</a>
+                    <a style="display:none" id="start-wod-btn" onclick="return confirm('Are you sure?')" class="btn btn-lg btn-primary" href="{{ path('app_default_start', {'id':wod.id}) }}">Start WOD for all</a>
                 </div>
 
                 <div id="wodbuddy-clock">
@@ -152,7 +153,7 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
                         {% for track in tracks %}
                         <tr>
                             <td>{{ track.createdAt|date('m/d H:i') }}</td>
-                            <td>{{ track.user.email }}</td>
+                            <td>{{ track.user.name }}</td>
                             <td class="text-right">{{ track.scoreText }} <small class="text-muted">({{ track.rxOrScaled }})</small></td>
                         </tr>
                         {% endfor %}

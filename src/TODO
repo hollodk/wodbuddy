@@ -1,3 +1,5 @@
+- make it visible that people need to get an invitation link from an organization, or they can start a new organization
+
 - if an user add a score, which is better than a previous, is_enabled should be false
 
 - add daily best times

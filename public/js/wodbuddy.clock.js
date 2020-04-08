@@ -531,6 +531,8 @@ function displayClock()
 
     if (header) {
         text = '<span class="h1">'+header+text+'</span><br><span>Total time: '+total+'</span>';
+    } else {
+        text = '<span class="h1">'+text+'</span><br><span>Total time: '+total+'</span>';
     }
 
     $('#wodbuddy-clock').html(text);

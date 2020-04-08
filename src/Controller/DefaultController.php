@@ -182,7 +182,12 @@ class DefaultController extends AbstractController
 
         $wodForm = $this->createForm(WodType::class, $wod);
 
-        $form = $this->createFormBuilder()
+        $data = [];
+        if ($this->getUser()) {
+            $data['name'] = $this->getUser()->getName();
+        }
+
+        $form = $this->createFormBuilder($data)
             ->add('name')
             ->getForm()
             ;
