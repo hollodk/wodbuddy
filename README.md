@@ -1,1 +1,5 @@
 # wodbuddy
+
+## getting started
+
+
