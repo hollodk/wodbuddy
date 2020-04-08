@@ -84,6 +84,11 @@ class Wod
      */
     private $ownerSession;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isFeatured = false;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -311,6 +316,18 @@ class Wod
     public function setOwnerSession(string $ownerSession): self
     {
         $this->ownerSession = $ownerSession;
+
+        return $this;
+    }
+
+    public function getIsFeatured(): ?bool
+    {
+        return $this->isFeatured;
+    }
+
+    public function setIsFeatured(bool $isFeatured): self
+    {
+        $this->isFeatured = $isFeatured;
 
         return $this;
     }

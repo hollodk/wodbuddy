@@ -20,6 +20,11 @@ class DefaultController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
+        $wods = $em->getRepository('App:Wod')->findBy(
+            ['isFeatured' => true],
+            ['name' => 'ASC']
+        );
+
         $organizationForm = $this->get('form.factory')
             ->createNamedBuilder('organization_form')
             ->add('name')
@@ -113,6 +118,7 @@ class DefaultController extends AbstractController
             'join_form' => $joinForm->createView(),
             'organization_form' => $organizationForm->createView(),
             'wod_form' => $wodForm->createView(),
+            'wods' => $wods,
         ]);
     }
 

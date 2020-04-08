@@ -31,6 +31,39 @@
 
             </div>
         </div>
+
+        <div class="card mb-2">
+            <div class="card-header">
+                Featured Workouts
+            </div>
+            <div class="card-body">
+                <p>We have some predefined workouts you can do, see the list below, and click on whatever workout you would like to do.</p>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th class="text-right">Workout</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for wod in wods %}
+                        <tr>
+                            <td>{{ wod.name }}</td>
+                            <td><small><b>{{ wod.timer }}</b>, {{ wod.description|slice(0,100) }}{% if wod.description|length > 100 %}...{% endif %}</small></td>
+                            <td class="text-right"><a class="btn btn-sm btn-primary" href="{{ path('app_default_wod', {'id':wod.id}) }}">workout</a></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2">There are no featured wods yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <div class="col-sm-4">
