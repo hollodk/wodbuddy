@@ -1,13 +1,16 @@
+- add featured wods on frontpage
+
+- make it visible that people need to get an invitation link from an organization, or they can start a new organization
+
 - make sure create organization works
 
 - edit organization
+
 - only logged in users can create wods for organization
-- only user created the wod can delete it
 
 - add chat
-- participants and chat has to be in overlay
 
-- make it visible that people need to get an invitation link from an organization, or they can start a new organization
+- participants and chat has to be in overlay
 
 - integrate shutterstock music in some way?
 
@@ -20,6 +23,7 @@
 - if an user add a score, which is better than a previous, is_enabled should be false
 
 - add daily best times
+
 - add monthly best times
 
 - fix reset button

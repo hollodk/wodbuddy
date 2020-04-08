@@ -22,8 +22,11 @@ var audioAssets = '{{ asset('audio/') }}';
     {% if organization %}
     <a class="btn btn-sm btn-primary" href="{{ path('app_default_organization', {'id':organization.id}) }}">&#60; Go to {{ organization.name }}</a>
     {% endif %}
+
+    {% if (wod.user and wod.user == app.user) or wod.ownerSession == app.request.session.id %}
     <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#configModal">Configure timer</span>
     <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#wodModal">Configure wod</span>
+    {% endif %}
 </div>
 
 <div class="row">
@@ -91,13 +94,22 @@ var audioAssets = '{{ asset('audio/') }}';
     </div>
 
     <div class="col-lg-6">
+        <div class="card mb-2">
+            <div class="card-header">
+                Share Workout
+            </div>
+            <div class="card-body">
+                <p><a href="{{ path('app_default_wod', {'id':wod.id}) }}">{{ url('app_default_wod', {'id':wod.id}) }}</a>, share this link with other participants.</p>
+            </div>
+        </div>
+
         {% if participant == null %}
         <div class="card mb-2">
             <div class="card-header">
                 Join Workout
             </div>
             <div class="card-body">
-                <p>If you want to join a workout with friends, enter you name here, to let other know you are ready.</p>
+                <p>If you want to join a workout with friends, <b>enter you name here</b>, to let other know you are ready.</p>
 
                 {% if is_granted('IS_AUTHENTICATED_REMEMBERED') == false %}
                 <p>Remember that you can <a href="{{ path('app_register') }}">create a free profile</a> and track your progress.</p>
@@ -410,7 +422,6 @@ var audioAssets = '{{ asset('audio/') }}';
                     </div>
                 </div>
 
-                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
                 <div class="card mb-2">
                     <div class="card-header">
                         Delete WOD
@@ -420,7 +431,6 @@ var audioAssets = '{{ asset('audio/') }}';
                         <a onclick="return confirm('Are you sure?')" class="btn btn-danger" href="{{ path('app_default_woddelete', {'id':wod.id}) }}">Delete WOD</a>
                     </div>
                 </div>
-                {% endif %}
 
             </div>
         </div>

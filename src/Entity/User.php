@@ -52,10 +52,16 @@ class User implements UserInterface
      */
     private $name;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Wod", mappedBy="user")
+     */
+    private $wods;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
         $this->tracks = new ArrayCollection();
+        $this->wods = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -206,6 +212,37 @@ class User implements UserInterface
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Wod[]
+     */
+    public function getWods(): Collection
+    {
+        return $this->wods;
+    }
+
+    public function addWod(Wod $wod): self
+    {
+        if (!$this->wods->contains($wod)) {
+            $this->wods[] = $wod;
+            $wod->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWod(Wod $wod): self
+    {
+        if ($this->wods->contains($wod)) {
+            $this->wods->removeElement($wod);
+            // set the owning side to null (unless already changed)
+            if ($wod->getUser() === $this) {
+                $wod->setUser(null);
+            }
+        }
 
         return $this;
     }

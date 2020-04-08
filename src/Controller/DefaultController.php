@@ -34,6 +34,8 @@ class DefaultController extends AbstractController
             ;
 
         $wod = new Wod();
+        $wod->setOwnerSession($request->getSession()->getId());
+        $wod->setUser($this->getUser());
         $wod->setName('My WOD');
 
         $wodForm = $this->createForm(WodType::class, $wod);
@@ -128,6 +130,8 @@ class DefaultController extends AbstractController
         );
 
         $wod = new Wod();
+        $wod->setOwnerSession($request->getSession()->getId());
+        $wod->setUser($this->getUser());
         $wod->setOrganization($organization);
 
         $start = new \DateTime();

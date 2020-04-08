@@ -74,6 +74,16 @@ class Wod
      */
     private $tracks;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="wods")
+     */
+    private $user;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $ownerSession;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -277,6 +287,30 @@ class Wod
                 $track->setWod(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getOwnerSession(): ?string
+    {
+        return $this->ownerSession;
+    }
+
+    public function setOwnerSession(string $ownerSession): self
+    {
+        $this->ownerSession = $ownerSession;
 
         return $this;
     }
