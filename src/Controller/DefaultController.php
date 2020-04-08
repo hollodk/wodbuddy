@@ -174,6 +174,12 @@ class DefaultController extends AbstractController
             ['name' => 'ASC']
         );
 
+        $tracks = $em->getRepository('App:Track')->findBy(
+            ['wod' => $wod],
+            ['score' => 'DESC'],
+            20
+        );
+
         $wodForm = $this->createForm(WodType::class, $wod);
 
         $form = $this->createFormBuilder()
@@ -223,6 +229,7 @@ class DefaultController extends AbstractController
             'participants' => $participants,
             'participant' => $participant,
             'participant_id' => $participantId,
+            'tracks' => $tracks,
         ]);
     }
 

@@ -65,6 +65,7 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
             <div class="card-body text-center">
                 <div class="mb-2">
                     <span class="btn btn-primary" id="wodbuddy-begin">Start workout</span>
+                    <a id="start-wod-btn" onclick="return confirm('Are you sure?')" class="btn btn-lg btn-primary" href="{{ path('app_default_start', {'id':wod.id}) }}">Start WOD for all</a>
                 </div>
 
                 <div id="wodbuddy-clock">
@@ -116,14 +117,12 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
                     </tr>
                     {% endif %}
                 </table>
-
-                 <a id="start-wod-btn" onclick="return confirm('Are you sure?')" class="btn btn-primary" href="{{ path('app_default_start', {'id':wod.id}) }}">Start WOD for all</a>
             </div>
         </div>
 
         <div class="card mb-2">
             <div class="card-header">
-                Participants
+                Online users
             </div>
             {% if is_granted('IS_AUTHENTICATED_REMEMBERED') == false %}
             <div class="card-body">
@@ -132,6 +131,32 @@ var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
             {% endif %}
             <div class="table-responsive">
                 <table class="table table-striped" id="participant-box">
+                </table>
+            </div>
+        </div>
+
+        <div class="card mb-2">
+            <div class="card-header">
+                Scoreboard and finisher
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th class="text-right">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for track in tracks %}
+                        <tr>
+                            <td>{{ track.createdAt|date('m/d H:i') }}</td>
+                            <td>{{ track.user.email }}</td>
+                            <td class="text-right">{{ track.scoreText }} <small class="text-muted">({{ track.rxOrScaled }})</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
         </div>

@@ -47,6 +47,11 @@ class User implements UserInterface
      */
     private $tracks;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $name;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -189,6 +194,18 @@ class User implements UserInterface
                 $track->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
 
         return $this;
     }

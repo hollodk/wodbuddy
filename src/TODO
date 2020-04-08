@@ -1,8 +1,11 @@
+- if an user add a score, which is better than a previous, is_enabled should be false
+
 - add daily best times
 - add monthly best times
-- add overall best times
 
 - add chat
 - participants and chat has to be in overlay
+
+- find wods from rss feed and add them as browsable options
 
 - convert to local timezone as well when the wod starts
