@@ -49,6 +49,11 @@ class Organization
      */
     private $users;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="organizations")
+     */
+    private $user;
+
     public function __construct()
     {
         $this->wods = new ArrayCollection();
@@ -183,6 +188,18 @@ class Organization
                 $user->setOrganization(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

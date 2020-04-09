@@ -136,6 +136,8 @@ class DefaultController extends AbstractController
                 )
             );
 
+            $organization->setUser($user);
+
             $em->persist($user);
             $em->flush();
 
@@ -171,6 +173,14 @@ class DefaultController extends AbstractController
             'wod_form' => $wodForm->createView(),
             'wods' => $wods,
         ]);
+    }
+
+    /**
+     * @Route("feedback")
+     */
+    public function feedback()
+    {
+        return $this->render('default/feedback.html.twig');
     }
 
     /**
@@ -243,7 +253,9 @@ class DefaultController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $session = $request->getSession();
 
-        $session->set('organization', $wod->getOrganization()->getId());
+        if ($wod->getOrganization()) {
+            $session->set('organization', $wod->getOrganization()->getId());
+        }
 
         $key = sprintf('wod_%d_participant', $wod->getId());
 

@@ -39,7 +39,9 @@
         <div class="card">
             <div class="card-header">
                 <h3>Create Workout</h3>
-
+            </div>
+            <div class="card-body">
+                {% if organization.user == app.user %}
                 {{ form_start(wod_form) }}
                 {{ form_row(wod_form.name) }}
                 <div class="form-group">
@@ -52,6 +54,11 @@
                 {{ form_row(wod_form.description) }}
                 <button class="btn btn-primary" type="submit">Create</button>
                 {{ form_end(wod_form) }}
+
+                {% else %}
+                <p>At this time, only administrator can create workout, you can build your own workouts from the frontpage.</p>
+                <a class="btn btn-primary" href="{{ path('homepage') }}">Go to frontpage</a>
+                {% endif %}
             </div>
         </div>
     </div>
