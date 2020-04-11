@@ -37,7 +37,9 @@
                             </td>
                             <td>{{ track.scoreText }}{% if track.scoreText %} <small class="text-muted">({{ track.rxOrScaled }})</small>{% endif %}</td>
                             <td class="text-right">
+                                {% if track.wod %}
                                 <a class="btn btn-sm btn-primary" href="{{ path('app_default_wod', {'id':track.wod.id}) }}">Go to WOD</a>
+                                {% endif %}
                             </td>
                         </tr>
                         {% else %}

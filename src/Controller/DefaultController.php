@@ -360,11 +360,33 @@ class DefaultController extends AbstractController
     }
 
     /**
+     * @Route("/{id}/profile")
+     */
+    public function profile(Request $request, User $user)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $tracks = $em->getRepository('App:Track')->findBy(
+            ['user' => $user],
+            ['workoutAt' => 'DESC'],
+            20
+        );
+
+        return $this->render('default/profile.html.twig', [
+            'tracks' => $tracks,
+        ]);
+    }
+
+    /**
      * @Route("/{id}/wod-delete")
      */
     public function woddelete(Request $request, Wod $wod)
     {
         $em = $this->getDoctrine()->getManager();
+
+        foreach ($wod->getTracks() as $t) {
+            $t->setWod(null);
+        }
 
         foreach ($wod->getParticipants() as $p) {
             $em->remove($p);

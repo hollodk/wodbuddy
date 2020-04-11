@@ -189,7 +189,7 @@ var audioAssets = '{{ asset('audio/') }}';
                         {% for track in tracks %}
                         <tr>
                             <td>{{ track.createdAt|date('m/d H:i') }}</td>
-                            <td>{{ track.user.name }}</td>
+                            <td><a href="{{ path('app_default_profile', {'id':track.user.id}) }}">{{ track.user.name }}</a></td>
                             <td class="text-right">{{ track.scoreText }} <small class="text-muted">({{ track.rxOrScaled }})</small></td>
                         </tr>
                         {% endfor %}
