@@ -54,10 +54,16 @@ class Organization
      */
     private $user;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\UserOrganization", mappedBy="organization")
+     */
+    private $userOrganizations;
+
     public function __construct()
     {
         $this->wods = new ArrayCollection();
         $this->users = new ArrayCollection();
+        $this->userOrganizations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -200,6 +206,37 @@ class Organization
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|UserOrganization[]
+     */
+    public function getUserOrganizations(): Collection
+    {
+        return $this->userOrganizations;
+    }
+
+    public function addUserOrganization(UserOrganization $userOrganization): self
+    {
+        if (!$this->userOrganizations->contains($userOrganization)) {
+            $this->userOrganizations[] = $userOrganization;
+            $userOrganization->setOrganization($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserOrganization(UserOrganization $userOrganization): self
+    {
+        if ($this->userOrganizations->contains($userOrganization)) {
+            $this->userOrganizations->removeElement($userOrganization);
+            // set the owning side to null (unless already changed)
+            if ($userOrganization->getOrganization() === $this) {
+                $userOrganization->setOrganization(null);
+            }
+        }
 
         return $this;
     }

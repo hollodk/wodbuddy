@@ -67,12 +67,18 @@ class User implements UserInterface
      */
     private $organizations;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\UserOrganization", mappedBy="user")
+     */
+    private $userOrganizations;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
         $this->tracks = new ArrayCollection();
         $this->wods = new ArrayCollection();
         $this->organizations = new ArrayCollection();
+        $this->userOrganizations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -295,6 +301,37 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($organization->getUser() === $this) {
                 $organization->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|UserOrganization[]
+     */
+    public function getUserOrganizations(): Collection
+    {
+        return $this->userOrganizations;
+    }
+
+    public function addUserOrganization(UserOrganization $userOrganization): self
+    {
+        if (!$this->userOrganizations->contains($userOrganization)) {
+            $this->userOrganizations[] = $userOrganization;
+            $userOrganization->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserOrganization(UserOrganization $userOrganization): self
+    {
+        if ($this->userOrganizations->contains($userOrganization)) {
+            $this->userOrganizations->removeElement($userOrganization);
+            // set the owning side to null (unless already changed)
+            if ($userOrganization->getUser() === $this) {
+                $userOrganization->setUser(null);
             }
         }
 

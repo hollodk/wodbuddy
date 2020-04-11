@@ -6,6 +6,7 @@ use App\Entity\Organization;
 use App\Entity\Participant;
 use App\Entity\Track;
 use App\Entity\User;
+use App\Entity\UserOrganization;
 use App\Entity\Wod;
 use App\Form\WodType;
 use App\Security\AppCustomAuthenticator;
@@ -198,6 +199,25 @@ class DefaultController extends AbstractController
             10
         );
 
+        if ($this->getUser()) {
+            $uo = $em->getRepository('App:UserOrganization')->findOneBy([
+                'user' => $this->getUser(),
+                'organization' => $organization,
+            ]);
+
+            if (!$uo) {
+                $uo = new UserOrganization();
+                $uo->setUser($this->getUser());
+                $uo->setOrganization($organization);
+
+                $em->persist($uo);
+            }
+
+            $uo->setLastVisitAt(new \DateTime());
+
+            $em->flush();
+        }
+
         $wod = new Wod();
         $wod->setOwnerSession($request->getSession()->getId());
         $wod->setUser($this->getUser());
@@ -389,6 +409,16 @@ class DefaultController extends AbstractController
                 $time += $request->get('time-sec');
             }
             $track->setScore($time);
+
+            break;
+
+        case 'rounds-reps':
+            $result = sprintf('%d.%d',
+                $request->get('rounds-reps-rounds'),
+                $request->get('rounds-reps-reps')
+            );
+
+            $track->setScore($result);
 
             break;
 

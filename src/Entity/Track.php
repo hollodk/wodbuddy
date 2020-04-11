@@ -48,7 +48,7 @@ class Track
     private $updatedAt;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $score;
 
@@ -154,12 +154,12 @@ class Track
         return $this;
     }
 
-    public function getScore(): ?int
+    public function getScore(): ?float
     {
         return $this->score;
     }
 
-    public function setScore(?int $score): self
+    public function setScore(?float $score): self
     {
         $this->score = $score;
 
@@ -239,6 +239,24 @@ class Track
             break;
         case 'time':
             $text = gmdate('H:i:s', $this->getScore());
+            break;
+
+        case 'rounds-reps':
+            if (preg_match("/\./", $this->getScore())) {
+                $o = preg_split("/\./", $this->getScore());
+
+                $rnds = $o[0];
+                $reps = $o[1];
+            } else {
+                $rnds = $this->getScore();
+                $reps = 0;
+            }
+
+            $text = sprintf('%d rnds, %d reps',
+                $rnds,
+                $reps
+            );
+
             break;
 
         case 'reps':

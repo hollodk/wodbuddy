@@ -2,6 +2,8 @@ var startDelay = wbConfig.delay;
 
 var isStarted = false;
 
+var manualCounter = 0;
+
 // total timer
 var totalTimer = 0;
 
@@ -65,6 +67,22 @@ $(document).ready(function() {
 });
 
 // wodbuddy stuff
+$('.wodbuddy-counter-add').on('click', function() {
+    var amount = parseInt($(this).data('amount'));
+    manualCounter = manualCounter+amount;
+
+    $('#wodbuddy-counter').html(manualCounter);
+});
+
+$('.wodbuddy-counter-sub').on('click', function() {
+    var amount = parseInt($(this).data('amount'));
+    manualCounter = (manualCounter-amount) > 0
+        ? manualCounter-amount
+        : 0;
+
+    $('#wodbuddy-counter').html(manualCounter);
+});
+
 $('#wodbuddy-begin').on('click', function() {
     initStart();
 });
@@ -193,6 +211,7 @@ function updateScore()
     switch (value) {
         case '':
             $('#modal-score-time').hide();
+            $('#modal-score-rounds-reps').hide();
             $('#modal-score-reps').hide();
             $('#modal-score-load').hide();
             $('#modal-score-calories').hide();
@@ -203,6 +222,18 @@ function updateScore()
 
         case 'time':
             $('#modal-score-time').show();
+            $('#modal-score-rounds-reps').hide();
+            $('#modal-score-reps').hide();
+            $('#modal-score-load').hide();
+            $('#modal-score-calories').hide();
+            $('#modal-score-points').hide();
+            $('#modal-score-meters').hide();
+
+            break;
+
+        case 'rounds-reps':
+            $('#modal-score-time').hide();
+            $('#modal-score-rounds-reps').show();
             $('#modal-score-reps').hide();
             $('#modal-score-load').hide();
             $('#modal-score-calories').hide();
@@ -213,6 +244,7 @@ function updateScore()
 
         case 'reps':
             $('#modal-score-time').hide();
+            $('#modal-score-rounds-reps').hide();
             $('#modal-score-reps').show();
             $('#modal-score-load').hide();
             $('#modal-score-calories').hide();
@@ -223,6 +255,7 @@ function updateScore()
 
         case 'load':
             $('#modal-score-time').hide();
+            $('#modal-score-rounds-reps').hide();
             $('#modal-score-reps').hide();
             $('#modal-score-load').show();
             $('#modal-score-calories').hide();
@@ -233,6 +266,7 @@ function updateScore()
 
         case 'calories':
             $('#modal-score-time').hide();
+            $('#modal-score-rounds-reps').hide();
             $('#modal-score-reps').hide();
             $('#modal-score-load').hide();
             $('#modal-score-calories').show();
@@ -243,6 +277,7 @@ function updateScore()
 
         case 'points':
             $('#modal-score-time').hide();
+            $('#modal-score-rounds-reps').hide();
             $('#modal-score-reps').hide();
             $('#modal-score-load').hide();
             $('#modal-score-calories').hide();
@@ -253,6 +288,7 @@ function updateScore()
 
         case 'meters':
             $('#modal-score-time').hide();
+            $('#modal-score-rounds-reps').hide();
             $('#modal-score-reps').hide();
             $('#modal-score-load').hide();
             $('#modal-score-calories').hide();
@@ -272,6 +308,7 @@ function updateParticipants()
             participant: wbConfig.participantId,
             wod: wbConfig.wodId,
             isStarted: isStarted,
+            counter: manualCounter,
         }
     })
     .done(function(data) {
@@ -292,11 +329,8 @@ function updateParticipants()
                 started = ' <i class="fas fa-history"></i>';
             }
 
-            if (value.is_me) {
-                $('#participant-box').append('<tr><td><b>&#62; '+value.name+started+'</b></td><td class="text-right">'+value.time_ago+'</td></tr>');
-            } else {
-                $('#participant-box').append('<tr><td>'+value.name+started+'</td><td class="text-right">'+value.time_ago+'</td></tr>');
-            }
+            var me = (value.is_me) ? '&#62; ' : '';
+            $('#participant-box').append('<tr><td>'+me+value.name+started+'</td><td>'+value.counter+' rnds</td><td class="text-right">'+value.time_ago+'</td></tr>');
         });
     })
     ;
