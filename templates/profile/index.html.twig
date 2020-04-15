@@ -54,6 +54,23 @@
     </div>
 
     <div class="col-sm-6">
+        <div class="card mb-2">
+            <div class="card-header">
+                Your Image Uploads
+            </div>
+            <div class="card-body">
+                {% for image in app.user.images %}
+                <a href="{{ path('app_default_image', {'id':image.id}) }}" data-lightbox="example-set" data-title="{{ image.user.name }}">
+                    <img style="height:200px" src="{{ path('app_default_image', {'id':image.id}) }}" alt="{{ image.user.name }}" class="img-thumbnail" />
+                </a>
+                <a onclick="return confirm('Are you sure?')" href="{{ path('app_default_imagedelete', {'id':image.id}) }}">[delete]</a>
+
+                {% else %}
+                <p>There are not uploaded any images yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
         {% if app.user.organization %}
         <div class="card mb-2">
             <div class="card-header">

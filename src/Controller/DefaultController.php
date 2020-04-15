@@ -449,6 +449,7 @@ class DefaultController extends AbstractController
         );
 
         return $this->render('default/profile.html.twig', [
+            'user' => $user,
             'tracks' => $tracks,
         ]);
     }
