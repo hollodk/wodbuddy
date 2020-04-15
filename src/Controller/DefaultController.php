@@ -172,11 +172,25 @@ class DefaultController extends AbstractController
             ]);
         }
 
+        $from = new \DateTime();
+        $from->modify('-1 hour');
+
+        $next = $em->getRepository('App:Wod')
+            ->createQueryBuilder('w')
+            ->andWhere('w.startAt > :from')
+            ->addOrderBy('w.startAt', 'ASC')
+            ->setMaxResults(10)
+            ->setParameter('from', $from)
+            ->getQuery()
+            ->getResult()
+            ;
+
         return $this->render('default/index.html.twig', [
             'join_form' => $joinForm->createView(),
             'organization_form' => $organizationForm->createView(),
             'wod_form' => $wodForm->createView(),
             'wods' => $wods,
+            'next' => $next,
         ]);
     }
 
