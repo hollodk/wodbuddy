@@ -11,6 +11,10 @@ wbConfig.wodId = '{{ wod.id }}';
 wbConfig.participantId = '{{ participant_id }}';
 
 var audioAssets = '{{ asset('audio/') }}';
+
+$('#form_image').on('change', function() {
+    $(this).parents().filter('form').submit();
+});
 </script>
 <script src="{{ asset('js/wodbuddy.clock.js') }}?v={{ random() }}"></script>
 {% endblock %}
@@ -131,6 +135,19 @@ var audioAssets = '{{ asset('audio/') }}';
             </div>
             <div class="card-body">
                 <p><a href="{{ path('app_default_wod', {'id':wod.id}) }}">{{ url('app_default_wod', {'id':wod.id}) }}</a>, share this link with other participants.</p>
+
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                <div class="card">
+                    <div class="card-body">
+                        <p>Share your workout environment</p>
+
+                        {{ form_start(image_form) }}
+                        {{ form_widget(image_form.image) }}
+                        {{ form_rest(image_form) }}
+                        {{ form_end(image_form) }}
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
 
@@ -197,6 +214,27 @@ var audioAssets = '{{ asset('audio/') }}';
                 </table>
             </div>
         </div>
+
+        <div class="card mb-2">
+            <div class="card-header">
+                Environment and emotions
+            </div>
+            <div class="card-body">
+                {% for image in images %}
+                <a href="{{ path('app_default_image', {'id':image.id}) }}" data-lightbox="example-set" data-title="{{ image.user.name }}">
+                    <img style="height:200px" src="{{ path('app_default_image', {'id':image.id}) }}" alt="{{ image.user.name }}" class="img-thumbnail" />
+                </a>
+
+                {% if image.user and image.user == app.user %}
+                <a onclick="return confirm('Are you sure?')" href="{{ path('app_default_imagedelete', {'id':image.id}) }}">[delete]</a>
+                {% endif %}
+
+                {% else %}
+                <p>There are not uploaded any images yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
     </div>
 </div>
 

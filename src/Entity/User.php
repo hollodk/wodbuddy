@@ -72,6 +72,11 @@ class User implements UserInterface
      */
     private $userOrganizations;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Image", mappedBy="user")
+     */
+    private $images;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -79,6 +84,7 @@ class User implements UserInterface
         $this->wods = new ArrayCollection();
         $this->organizations = new ArrayCollection();
         $this->userOrganizations = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -332,6 +338,37 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($userOrganization->getUser() === $this) {
                 $userOrganization->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Image[]
+     */
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(Image $image): self
+    {
+        if (!$this->images->contains($image)) {
+            $this->images[] = $image;
+            $image->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(Image $image): self
+    {
+        if ($this->images->contains($image)) {
+            $this->images->removeElement($image);
+            // set the owning side to null (unless already changed)
+            if ($image->getUser() === $this) {
+                $image->setUser(null);
             }
         }
 

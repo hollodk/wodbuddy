@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Image;
 use App\Entity\Organization;
 use App\Entity\Participant;
 use App\Entity\Track;
@@ -12,7 +13,10 @@ use App\Form\WodType;
 use App\Security\AppCustomAuthenticator;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
@@ -196,7 +200,7 @@ class DefaultController extends AbstractController
         $wods = $em->getRepository('App:Wod')->findBy(
             ['organization' => $organization],
             ['startAt' => 'DESC'],
-            10
+            20
         );
 
         if ($this->getUser()) {
@@ -294,6 +298,70 @@ class DefaultController extends AbstractController
             20
         );
 
+        $imageForm = $this->createFormBuilder()
+            ->add('image', FileType::class, [
+                'attr' => [
+                    'capture' => 'camera',
+                    'accept' => 'image/*',
+                    'class' => '',
+                ],
+            ])
+            ->getForm()
+            ;
+
+        $imageForm->handleRequest($request);
+
+        if ($imageForm->isSubmitted() && $imageForm->isValid()) {
+            $data = $imageForm->getData();
+
+            $filter = new \Imagine\Filter\Basic\WebOptimization();
+            $imagine = new \Imagine\Gd\Imagine();
+
+            $dimentions = @getimagesize($data['image']->getRealPath());
+
+            if ($dimentions[0] > $dimentions[1]) {
+                $width = 800;
+                $height = 600;
+            } else {
+                $width = 600;
+                $height = 800;
+            }
+
+            $img = $filter->apply(
+                $imagine->open($data['image']->getRealPath())
+                ->thumbnail(
+                    new \Imagine\Image\Box($width, $height),
+                    \Imagine\Image\ImageInterface::THUMBNAIL_OUTBOUND
+                )
+            );
+
+            $filename = null;
+            switch ($data['image']->getMimeType()) {
+            case 'image/jpeg':
+                $filename = '/tmp/upload.jpg';
+                break;
+
+            case 'image/png':
+                $filename = '/tmp/upload.png';
+                break;
+            }
+
+            $img->save($filename);
+
+            $image = new Image();
+            $image->setUser($this->getUser());
+            $image->setWod($wod);
+            $image->setMimeType($data['image']->getMimeType());
+            $image->setContent(base64_encode(file_get_contents($filename)));
+
+            $em->persist($image);
+            $em->flush();
+
+            return $this->redirectToRoute('app_default_wod', [
+                'id' => $wod->getId(),
+            ]);
+        }
+
         $wodForm = $this->createForm(WodType::class, $wod);
         $wodForm->remove('timer');
 
@@ -346,16 +414,24 @@ class DefaultController extends AbstractController
 
         $participantId = ($participant) ? $participant->getId() : null;
 
+        $images = $em->getRepository('App:Image')->findBy(
+            ['wod' => $wod],
+            ['id' => 'DESC'],
+            20
+        );
+
         return $this->render('default/wod.html.twig', [
             'wod' => $wod,
             'attribute' => json_decode($wod->getAttribute()),
             'organization' => $wod->getOrganization(),
             'form' => $form->createView(),
             'wod_form' => $wodForm->createView(),
+            'image_form' => $imageForm->createView(),
             'participants' => $participants,
             'participant' => $participant,
             'participant_id' => $participantId,
             'tracks' => $tracks,
+            'images' => $images,
         ]);
     }
 
@@ -374,6 +450,21 @@ class DefaultController extends AbstractController
 
         return $this->render('default/profile.html.twig', [
             'tracks' => $tracks,
+        ]);
+    }
+
+    /**
+     * @Route("/{id}/image-delete")
+     */
+    public function imagedelete(Request $request, Image $image)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $em->remove($image);
+        $em->flush();
+
+        return $this->redirectToRoute('app_default_wod', [
+            'id' => $image->getWod()->getId(),
         ]);
     }
 
@@ -528,5 +619,20 @@ class DefaultController extends AbstractController
         return $this->redirectToRoute('app_default_wod', [
             'id' => $wod->getId(),
         ]);
+    }
+
+    /**
+     * @Route("/{id}/image")
+     */
+    public function image(Request $request, Image $image)
+    {
+        $response = new Response();
+        $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $image->getFilename());
+        $response->headers->set('Content-Disposition', $disposition);
+        $response->headers->set('Content-Type', $image->getMimeType());
+
+        $response->setContent(base64_decode($image->getContent()));
+
+        return $response;
     }
 }

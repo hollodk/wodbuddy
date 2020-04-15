@@ -89,10 +89,16 @@ class Wod
      */
     private $isFeatured = false;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Image", mappedBy="wod")
+     */
+    private $images;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
         $this->tracks = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -328,6 +334,37 @@ class Wod
     public function setIsFeatured(bool $isFeatured): self
     {
         $this->isFeatured = $isFeatured;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Image[]
+     */
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(Image $image): self
+    {
+        if (!$this->images->contains($image)) {
+            $this->images[] = $image;
+            $image->setWod($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(Image $image): self
+    {
+        if ($this->images->contains($image)) {
+            $this->images->removeElement($image);
+            // set the owning side to null (unless already changed)
+            if ($image->getWod() === $this) {
+                $image->setWod(null);
+            }
+        }
 
         return $this;
     }

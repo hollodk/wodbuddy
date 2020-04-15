@@ -74,7 +74,7 @@ class ApiController extends AbstractController
                 'time_ago' => $this->timeAgo($p->getLastSeenAt()),
                 'is_me' => false,
                 'is_started' => $memcached->get(sprintf($startedKey, $wod->getId(), $p->getId())),
-                'counter' => $memcached->get(sprintf($counterKey, $wod->getId(), $p->getId())),
+                'counter' => (int) $memcached->get(sprintf($counterKey, $wod->getId(), $p->getId())),
             ];
 
             if ($user && $user->getId() == $p->getId()) {
