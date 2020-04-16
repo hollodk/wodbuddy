@@ -5,6 +5,7 @@
 {% block javascripts %}
 <script>
 var participantsUrl = '{{ path('app_api_participants') }}';
+var imageUrl = '{{ path('app_default_image') }}';
 var readyUrl = '{{ path('app_api_ready', {'wod':wod.id}) }}';
 var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
 wbConfig.wodId = '{{ wod.id }}';
@@ -31,13 +32,17 @@ $('#form_image').on('change', function() {
     <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#configModal">Configure timer</span>
     <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#wodModal">Configure wod</span>
     {% endif %}
+
+    {% if participant == null %}
+    <span class="btn btn-sm btn-primary" data-toggle="modal" data-target="#joinModal">Join online class</span>
+    {% endif %}
 </div>
 
 <div class="row">
     <div class="col-lg-6">
         <div class="card mb-2">
             <div class="card-header">
-                Start at: {{ wod.startAt|date('Y/m/d H:i') }}
+                Start at: {{ wod.startAt|date('Y/m/d H:i, e') }}
             </div>
             <div class="card-body">
                 {{ wod.description|nl2br }}
@@ -96,6 +101,7 @@ $('#form_image').on('change', function() {
             </div>
         </div>
 
+        {% if participant %}
         <div class="card mb-2" id="wodbuddy-box">
             <div class="card-header">
                 Rounds or rep counter
@@ -125,48 +131,42 @@ $('#form_image').on('change', function() {
                 </div>
             </div>
         </div>
+        {% endif %}
 
     </div>
 
     <div class="col-lg-6">
+
+        <div class="card mb-2" id="workout-buddies" style="display:none">
+            <div class="card-header">
+                Your online workout buddies
+            </div>
+            <div class="card-body" id="workout-buddies-container">
+            </div>
+        </div>
+
+        {% if participant == null or participant.image == false %}
         <div class="card mb-2">
             <div class="card-header">
-                Share Workout
+                Social Workout
             </div>
             <div class="card-body">
                 <p><a href="{{ path('app_default_wod', {'id':wod.id}) }}">{{ url('app_default_wod', {'id':wod.id}) }}</a>, share this link with other participants.</p>
 
-                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-                <div class="card">
-                    <div class="card-body">
-                        <p>Share your workout environment</p>
+                {% if participant %}
+                <p>Share your daily avatar, <b>click the button</b> below and let's get social :)</p>
 
-                        {{ form_start(image_form) }}
-                        {{ form_widget(image_form.image) }}
-                        {{ form_rest(image_form) }}
-                        {{ form_end(image_form) }}
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        {% if participant == null %}
-        <div class="card mb-2">
-            <div class="card-header">
-                Join Workout
-            </div>
-            <div class="card-body">
-                <p>If you want to join a workout with friends, <b>enter you name here</b>, to let other know you are ready.</p>
-
-                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') == false %}
-                <p>Remember that you can <a href="{{ path('app_register') }}">create a free profile</a> and track your progress.</p>
+                {{ form_start(image_form) }}
+                {{ form_widget(image_form.image) }}
+                {{ form_rest(image_form) }}
+                {{ form_end(image_form) }}
                 {% endif %}
 
-                {{ form_start(form) }}
-                {{ form_row(form.name) }}
-                <button class="btn btn-primary" type="submit">Join</button>
-                {{ form_end(form) }}
+                {% if participant == null %}
+                <p>Let your friends know you want to workout with them.</p>
+                <span class="btn btn-primary" data-toggle="modal" data-target="#joinModal">Join online class</span>
+                {% endif %}
+
             </div>
         </div>
         {% endif %}
@@ -215,26 +215,6 @@ $('#form_image').on('change', function() {
             </div>
         </div>
 
-        <div class="card mb-2">
-            <div class="card-header">
-                Environment and emotions
-            </div>
-            <div class="card-body">
-                {% for image in images %}
-                <a href="{{ path('app_default_image', {'id':image.id}) }}" data-lightbox="example-set" data-title="{{ image.user.name }}">
-                    <img style="height:200px" src="{{ path('app_default_image', {'id':image.id}) }}" alt="{{ image.user.name }}" class="img-thumbnail" />
-                </a>
-
-                {% if image.user and image.user == app.user %}
-                <a onclick="return confirm('Are you sure?')" href="{{ path('app_default_imagedelete', {'id':image.id}) }}">[delete]</a>
-                {% endif %}
-
-                {% else %}
-                <p>There are not uploaded any images yet.</p>
-                {% endfor %}
-            </div>
-        </div>
-
     </div>
 </div>
 
@@ -267,6 +247,10 @@ $('#form_image').on('change', function() {
                         <option {% if wod.config('delay') == '20' %}selected{% endif %} value="20">20 seconds</option>
                         <option {% if wod.config('delay') == '30' %}selected{% endif %} value="30">30 seconds</option>
                         <option {% if wod.config('delay') == '60' %}selected{% endif %} value="60">60 seconds</option>
+                        <option {% if wod.config('delay') == '120' %}selected{% endif %} value="120">2 minutes</option>
+                        <option {% if wod.config('delay') == '300' %}selected{% endif %} value="300">5 minutes</option>
+                        <option {% if wod.config('delay') == '600' %}selected{% endif %} value="600">10 minutes</option>
+                        <option {% if wod.config('delay') == '900' %}selected{% endif %} value="900">15 minutes</option>
                     </select>
                     <small class="text-muted">Delay before the workout start.</small>
                 </div>
@@ -524,6 +508,62 @@ $('#form_image').on('change', function() {
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </div>
+</div>
+{{ form_end(wod_form) }}
+
+<form action="{{ path('app_default_join', {'id':wod.id}) }}" method="post">
+<div class="modal fade" id="joinModal" tabindex="-1" role="dialog" aria-labelledby="joinModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="wodModalLabel">Join Workout</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') == false %}
+                <div class="card mb-2">
+                    <div class="card-header">
+                        Join and create a free user
+                    </div>
+                    <div class="card-body">
+                        <p>You can join here, and register all your workouts, its totally free.</p>
+
+                        {{ form_start(registration_form) }}
+                        {{ form_row(registration_form.name) }}
+                        {{ form_row(registration_form.email) }}
+                        {{ form_row(registration_form.plainPassword) }}
+
+                        <div class="row">
+                            <div class="col-6">
+                                <button class="btn btn-primary">Register Account</button>
+                            </div>
+                            <div class="col-6 text-right" >
+                                <a class="btn btn-primary" href="{{ path('app_login') }}">Login</a>
+                            </div>
+                        </div>
+                        {{ form_end(registration_form) }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header">
+                        Join the workout anonymously
+                    </div>
+                    <div class="card-body">
+                        <p>You can also join the workout anonymously, just enter your name here.</p>
+                        {{ form_start(form) }}
+                        {{ form_row(form.name) }}
+                        <button class="btn btn-primary" type="submit">Join Anonymously</button>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

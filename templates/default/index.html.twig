@@ -57,7 +57,7 @@
                                 <br><small class="text-muted">{{ wod.organization ? wod.organization.name }}</small>
                             </td>
                             <td>
-                                Start: <b>{{ wod.startAt|date('Y-m-d H:i') }}</b>
+                                Start: <b>{{ wod.startAt|date('Y/m/d H:i, e') }}</b>
                                 <br><small><b>{{ wod.timer }}</b>, {{ wod.description|slice(0,100) }}{% if wod.description|length > 100 %}...{% endif %}</small>
                             </td>
                             <td class="text-right"><a class="btn btn-sm btn-primary" href="{{ path('app_default_wod', {'id':wod.id}) }}">workout</a></td>

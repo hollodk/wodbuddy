@@ -15,7 +15,7 @@
                 {% for wod in wods %}
                 <div class="card mb-2">
                     <div class="card-header">
-                        Start at: {{ wod.startAt ? wod.startAt|date('Y/m/d H:i') }}
+                        Start at: {{ wod.startAt ? wod.startAt|date('Y/m/d H:i, e') }}
                     </div>
                     <div class="card-body">
                         {% if wod.name %}<b>{{ wod.name }}</b><br>{% endif %}

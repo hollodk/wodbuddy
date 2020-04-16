@@ -9,6 +9,7 @@ use App\Entity\Track;
 use App\Entity\User;
 use App\Entity\UserOrganization;
 use App\Entity\Wod;
+use App\Form\RegistrationFormType;
 use App\Form\WodType;
 use App\Security\AppCustomAuthenticator;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -312,6 +313,8 @@ class DefaultController extends AbstractController
             20
         );
 
+        $registrationForm = $this->createForm(RegistrationFormType::class);
+
         $imageForm = $this->createFormBuilder()
             ->add('image', FileType::class, [
                 'attr' => [
@@ -367,6 +370,10 @@ class DefaultController extends AbstractController
             $image->setWod($wod);
             $image->setMimeType($data['image']->getMimeType());
             $image->setContent(base64_encode(file_get_contents($filename)));
+
+            if ($participant) {
+                $participant->setImage($image);
+            }
 
             $em->persist($image);
             $em->flush();
@@ -428,12 +435,6 @@ class DefaultController extends AbstractController
 
         $participantId = ($participant) ? $participant->getId() : null;
 
-        $images = $em->getRepository('App:Image')->findBy(
-            ['wod' => $wod],
-            ['id' => 'DESC'],
-            20
-        );
-
         return $this->render('default/wod.html.twig', [
             'wod' => $wod,
             'attribute' => json_decode($wod->getAttribute()),
@@ -445,7 +446,7 @@ class DefaultController extends AbstractController
             'participant' => $participant,
             'participant_id' => $participantId,
             'tracks' => $tracks,
-            'images' => $images,
+            'registration_form' => $registrationForm->createView(),
         ]);
     }
 
@@ -579,6 +580,24 @@ class DefaultController extends AbstractController
     }
 
     /**
+     * @Route("/{id}/join")
+     */
+    public function join(Request $request, Wod $wod)
+    {
+        $data = $request->request->all();
+
+        $wod->setTimer($data['type']);
+        $wod->setAttribute(json_encode($data));
+
+        $em = $this->getDoctrine()->getManager();
+        $em->flush();
+
+        return $this->redirectToRoute('app_default_wod', [
+            'id' => $wod->getId(),
+        ]);
+    }
+
+    /**
      * @Route("/{id}/timer")
      */
     public function timer(Request $request, Wod $wod)
@@ -637,10 +656,14 @@ class DefaultController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/image")
+     * @Route("/image")
      */
-    public function image(Request $request, Image $image)
+    public function image(Request $request)
     {
+        $em = $this->getDoctrine()->getManager();
+
+        $image = $em->find('App:Image', $request->get('id'));
+
         $response = new Response();
         $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $image->getFilename());
         $response->headers->set('Content-Disposition', $disposition);

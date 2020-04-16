@@ -71,11 +71,16 @@ class ApiController extends AbstractController
         foreach ($participants as $p) {
             $params = [
                 'name' => $p->getName(),
+                'image' => null,
                 'time_ago' => $this->timeAgo($p->getLastSeenAt()),
                 'is_me' => false,
                 'is_started' => $memcached->get(sprintf($startedKey, $wod->getId(), $p->getId())),
                 'counter' => (int) $memcached->get(sprintf($counterKey, $wod->getId(), $p->getId())),
             ];
+
+            if ($p->getImage()) {
+                $params['image'] = $p->getImage()->getId();
+            }
 
             if ($user && $user->getId() == $p->getId()) {
                 $params['is_me'] = true;

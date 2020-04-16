@@ -54,6 +54,11 @@ class Participant
      */
     private $tracks;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Image", inversedBy="participants")
+     */
+    private $image;
+
     public function __construct()
     {
         $this->tracks = new ArrayCollection();
@@ -180,6 +185,18 @@ class Participant
                 $track->setParticipant(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getImage(): ?Image
+    {
+        return $this->image;
+    }
+
+    public function setImage(?Image $image): self
+    {
+        $this->image = $image;
 
         return $this;
     }

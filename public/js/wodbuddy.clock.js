@@ -313,6 +313,7 @@ function updateParticipants()
     })
     .done(function(data) {
         $('#participant-box').html('');
+        $('#workout-buddies-container').html('');
 
         if (data.participants.length > 1) {
             if (monitorStarted == false) {
@@ -331,6 +332,14 @@ function updateParticipants()
 
             var me = (value.is_me) ? '&#62; ' : '';
             $('#participant-box').append('<tr><td>'+me+value.name+started+'</td><td>'+value.counter+' rnds</td><td class="text-right">'+value.time_ago+'</td></tr>');
+
+            if (value.image) {
+                var image = imageUrl+'?id='+value.image;
+
+                $('#workout-buddies').show();
+                $('#workout-buddies-container').append('<a href="'+image+'" data-lightbox="example-set" title="'+value.name+'" data-title="'+value.name+'"><img style="height:200px" src="'+image+'" alt="'+value.name+'" class="img-thumbnail" /></a>');
+            }
+
         });
     })
     ;
