@@ -94,6 +94,11 @@ class Wod
      */
     private $images;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $scoringType;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -365,6 +370,18 @@ class Wod
                 $image->setWod(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getScoringType(): ?string
+    {
+        return $this->scoringType;
+    }
+
+    public function setScoringType(?string $scoringType): self
+    {
+        $this->scoringType = $scoringType;
 
         return $this;
     }

@@ -15,6 +15,18 @@ class WodType extends AbstractType
         $builder
             ->add('startAt')
             ->add('name')
+            ->add('scoringType', ChoiceType::class, [
+                'choices' => [
+                    '' => 'How to enter score',
+                    'Time' => 'time',
+                    'Rounds and reps' => 'rounds-reps',
+                    'Reps' => 'reps',
+                    'Load' => 'load',
+                    'Calories' => 'calories',
+                    'Points' => 'points',
+                    'Meters' => 'meters',
+                ],
+            ])
             ->add('stream')
             ->add('timer', ChoiceType::class, [
                 'choices' => [

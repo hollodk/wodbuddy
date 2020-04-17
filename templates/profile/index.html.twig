@@ -59,7 +59,7 @@
                 Your Image Uploads
             </div>
             <div class="card-body">
-                {% for image in app.user.images %}
+                {% for image in images %}
                 <a href="{{ path('app_default_image', {'id':image.id}) }}" data-lightbox="example-set" data-title="{{ image.user.name }}">
                     <img style="height:200px" src="{{ path('app_default_image', {'id':image.id}) }}" alt="{{ image.user.name }}" class="img-thumbnail" />
                 </a>

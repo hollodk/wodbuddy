@@ -208,6 +208,10 @@ function updateScore()
 {
     var value = $('#modal-score-type option:checked').val();
 
+    if (wbConfig.scoringType != '') {
+        value = wbConfig.scoringType;
+    }
+
     switch (value) {
         case '':
             $('#modal-score-time').hide();

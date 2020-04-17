@@ -307,9 +307,19 @@ class DefaultController extends AbstractController
             ['name' => 'ASC']
         );
 
+        switch ($wod->getScoringType()) {
+        case 'time':
+            $scoreSort = 'ASC';
+            break;
+
+        default:
+            $scoreSort = 'DESC';
+            break;
+        }
+
         $tracks = $em->getRepository('App:Track')->findBy(
             ['wod' => $wod],
-            ['score' => 'DESC'],
+            ['score' => $scoreSort],
             20
         );
 
@@ -584,10 +594,48 @@ class DefaultController extends AbstractController
      */
     public function join(Request $request, Wod $wod)
     {
-        $data = $request->request->all();
+        $em = $this->getDoctrine()->getManager();
 
-        $wod->setTimer($data['type']);
-        $wod->setAttribute(json_encode($data));
+        $key = sprintf('wod_%d_participant', $wod->getId());
+
+        $data = [];
+        $form = $this->createFormBuilder($data)
+            ->add('name')
+            ->getForm()
+            ;
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            if ($this->getUser()) {
+                $participant = $em->getRepository('App:Participant')->findOneBy([
+                    'user' => $this->getUser(),
+                    'wod' => $wod,
+                ]);
+            }
+
+            if (!$participant) {
+                $participant = new Participant();
+                $participant->setUser($this->getUser());
+                $participant->setWod($wod);
+                $participant->setLastSeenAt(new \DateTime());
+
+                $em->persist($participant);
+            }
+
+            $participant->setName($data['name']);
+
+            $em->flush();
+
+            $request->getSession()->set($key, $participant->getId());
+
+            return $this->redirectToRoute('app_default_wod', [
+                'id' => $wod->getId(),
+                'participant' => $participant,
+            ]);
+        }
 
         $em = $this->getDoctrine()->getManager();
         $em->flush();

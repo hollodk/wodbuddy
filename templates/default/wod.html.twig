@@ -10,6 +10,7 @@ var readyUrl = '{{ path('app_api_ready', {'wod':wod.id}) }}';
 var wbConfig = JSON.parse('{{ wod.attribute|raw }}');
 wbConfig.wodId = '{{ wod.id }}';
 wbConfig.participantId = '{{ participant_id }}';
+wbConfig.scoringType = '{{ wod.scoringType }}';
 
 var audioAssets = '{{ asset('audio/') }}';
 
@@ -363,8 +364,9 @@ $('#form_image').on('change', function() {
             </div>
             <div class="modal-body">
                 <div class="form-group">
+                    {% if wod.scoringType == '' %}
                     <label>Scoring:</label>
-                    <select name="type" id="modal-score-type" class="form-control" id="score-type">
+                    <select name="type" id="modal-score-type" class="form-control">
                         <option value="time">Time</option>
                         <option value="rounds-reps">Rounds and reps</option>
                         <option value="reps">Reps</option>
@@ -374,6 +376,9 @@ $('#form_image').on('change', function() {
                         <option value="meters">Meters</option>
                         <option value="">Do not enter my score</option>
                     </select>
+                    {% else %}
+                    <input type="hidden" name="type" id="modal-score-type" value="{{ wod.scoringType }}">
+                    {% endif %}
                 </div>
 
                 <div class="form-group" id="modal-score-time">

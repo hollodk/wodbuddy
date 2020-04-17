@@ -34,9 +34,16 @@ class ProfileController extends AbstractController
             20
         );
 
+        $images = $em->getRepository('App:Image')->findBy(
+            ['user' => $this->getUser()],
+            ['id' => 'DESC'],
+            20
+        );
+
         return $this->render('profile/index.html.twig', [
             'participants' => $participants,
             'tracks' => $tracks,
+            'images' => $images,
         ]);
     }
 }
