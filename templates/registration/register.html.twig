@@ -16,6 +16,8 @@
         {{ form_row(registrationForm.plainPassword) }}
 
         <button class="btn btn-lg btn-primary">Register</button>
+
+        <input type="hidden" name="_target_path" value="{{ app.request.get('_redirect_url') }}"/>
         {{ form_end(registrationForm) }}
     </div>
 </div>

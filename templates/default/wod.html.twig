@@ -68,7 +68,7 @@ $('#form_image').on('change', function() {
                 {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
                 <span class="btn btn-primary" data-toggle="modal" data-target="#trackModal">Register you workout</span>
                 {% else %}
-                <p>Login or <a href="{{ path('app_register') }}">create a free profile</a> to track your score.</p>
+                <p>Login or <a href="{{ path('app_register', {'_redirect_url':path('app_default_wod', {'id':wod.id})}) }}">create a free profile</a> to track your score.</p>
                 {% endif %}
             </div>
             {% if wod.name %}
@@ -549,13 +549,12 @@ $('#form_image').on('change', function() {
                                 <button class="btn btn-primary">Register Account</button>
                             </div>
                             <div class="col-6 text-right" >
-                                <a class="btn btn-primary" href="{{ path('app_login') }}">Login</a>
+                                <a class="btn btn-primary" href="{{ path('app_login', {'_redirect_url':path('app_default_wod', {'id':wod.id})}) }}">Login</a>
                             </div>
                         </div>
                         {{ form_end(registration_form) }}
                     </div>
                 </div>
-                {% endif %}
 
                 <div class="card">
                     <div class="card-header">
@@ -569,6 +568,22 @@ $('#form_image').on('change', function() {
                         {{ form_end(form) }}
                     </div>
                 </div>
+
+                {% else %}
+                <div class="card">
+                    <div class="card-header">
+                        Join the workout
+                    </div>
+                    <div class="card-body">
+                        <p>Just enter your name here.</p>
+                        {{ form_start(form) }}
+                        {{ form_row(form.name) }}
+                        <button class="btn btn-primary" type="submit">Join Workout</button>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                {% endif %}
             </div>
         </div>
     </div>

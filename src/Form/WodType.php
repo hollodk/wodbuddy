@@ -16,8 +16,9 @@ class WodType extends AbstractType
             ->add('startAt')
             ->add('name')
             ->add('scoringType', ChoiceType::class, [
+                'required' => false,
                 'choices' => [
-                    '' => 'How to enter score',
+                    '' => '',
                     'Time' => 'time',
                     'Rounds and reps' => 'rounds-reps',
                     'Reps' => 'reps',

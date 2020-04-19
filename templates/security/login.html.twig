@@ -30,7 +30,9 @@
                 <input type="password" name="password" id="inputPassword" class="form-control" required>
             </div>
 
+            <input type="hidden" name="_target_path" value="{{ app.request.get('_redirect_url') }}"/>
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
             <button class="btn btn-lg btn-primary" type="submit">
                 Sign in
             </button>
